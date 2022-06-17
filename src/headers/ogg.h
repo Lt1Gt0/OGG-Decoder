@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "oggmeta.h"
+#include "endian.h"
 
 class OGG
 {

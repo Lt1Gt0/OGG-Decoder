@@ -28,7 +28,8 @@ OGG::OGG(char* filepath)
 int OGG::LoadPageHeader()
 {
     this->pageHeader = new PageHeader;
-    fread(this->pageHeader, 1, sizeof(PageHeader), this->fp);
+    fread(this->pageHeader, sizeof(uint8_t), sizeof(PageHeader), this->fp);
+    
 
     fprintf(stdout, "PageHeader->CapturePattern: %X\n", this->pageHeader->CapturePattern);
     fprintf(stdout, "Valid Capture Pattern: %X\n", VALID_CAPTURE_PATTERN);
