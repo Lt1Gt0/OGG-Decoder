@@ -1,0 +1,11 @@
+#include "ogg.h"
+
+OGG::OGG()
+{
+
+}
+
+OGG::~OGG()
+{
+    
+}

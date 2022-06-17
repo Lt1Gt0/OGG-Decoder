@@ -4,7 +4,7 @@
 int main(int argc, char** argv)
 {
     if (argc < 2) {
-        fprintf(stdout, "No file provided\neExiting...\n");
+        fprintf(stdout, "No file provided\nExiting...\n");
         exit(1);
     }
 
