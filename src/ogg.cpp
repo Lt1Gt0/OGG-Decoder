@@ -1,5 +1,6 @@
 #include "ogg.h"
 #include "oggmeta.h"
+#include "endian.h"
 
 #include <stdlib.h>
 
@@ -30,10 +31,7 @@ int OGG::LoadPageHeader()
     this->pageHeader = new PageHeader;
     fread(this->pageHeader, sizeof(uint8_t), sizeof(PageHeader), this->fp);
     
-
-    fprintf(stdout, "PageHeader->CapturePattern: %X\n", this->pageHeader->CapturePattern);
-    fprintf(stdout, "Valid Capture Pattern: %X\n", VALID_CAPTURE_PATTERN);
-    if (!(this->pageHeader->CapturePattern == (uint32_t)VALID_CAPTURE_PATTERN)) {
+    if (!(Endian::BigEndian32(this->pageHeader->CapturePattern) == (uint32_t)VALID_CAPTURE_PATTERN)) {
          fprintf(stdout, "Invalid Capture pattern\n");
          return 0;
      }
