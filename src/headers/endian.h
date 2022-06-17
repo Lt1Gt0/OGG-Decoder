@@ -20,5 +20,4 @@ namespace Endian
     uint64_t BigEndian64(uint64_t value);
 }
 
-
 #endif // ENDIAN_H

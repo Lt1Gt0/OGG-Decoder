@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "endian.h"
-
 #include "ogg.h"
 
 int main(int argc, char** argv)
@@ -15,10 +13,7 @@ int main(int argc, char** argv)
     char* filepath = argv[1];
     fprintf(stdout, "Inputted file: %s\n", filepath);
 
-
-
-
-    OGG* ogg = new OGG(filepath);        
+    OGG* ogg = new OGG(filepath);    
 
     return 0;
 }
