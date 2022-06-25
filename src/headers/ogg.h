@@ -21,7 +21,7 @@ class OGG
          * 
          * @return (int) status : 0 = success, 1 = failure 
          */
-        int LoadNewPage();
+        int LoadNewPageHeader();
 
     private:
 };

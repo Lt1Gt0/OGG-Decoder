@@ -24,7 +24,7 @@ namespace OggMeta
         uint32_t    PageChecksum;
         uint8_t     PageSegments;
         uint8_t*    SegmentTable;
-    };
+    } __attribute__((packed));
     
     struct Page {
         PageHeader* Header;
