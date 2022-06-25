@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-
 #include "ogg.h"
 #include "oggmeta.h"
 #include "Debug/debug.h"
@@ -42,12 +40,6 @@ int main(int argc, char** argv)
     // For a simple sanity check
     uint8_t nextByte;
     fread(&nextByte, 1, 1, ogg->fp);
-    Debug::Print("Next Byte 0x%X", nextByte);
-
-    // for (int i = 0; i < 10; i++) {
-        // ogg->LoadNewPageHeader();
-        // fprintf(stdout, "%ld\n", ftell(ogg->fp));
-    // }
 
     return 0;
 }

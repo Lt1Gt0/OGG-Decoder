@@ -2,10 +2,9 @@
 #ifndef _OGG_H
 #define _OGG_H
 
-#include <stdio.h>
 #include <vector>
+#include <stdio.h>
 #include "oggmeta.h"
-#include "endian.h"
 
 class OGG
 { 
@@ -24,6 +23,8 @@ class OGG
         int LoadNewPageHeader();
 
     private:
+        int CheckVorbis();
+        void LoadVorbisHeaders();
 };
 
 #endif // _OGG_H

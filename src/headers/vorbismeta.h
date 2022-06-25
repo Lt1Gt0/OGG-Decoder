@@ -8,12 +8,12 @@
 
 namespace OggMeta {
     namespace Vorbis {
-        #define VORBIS_OCTET 0x766F72626973
+        #define VORBIS_OCTET "vorbis"
 
         struct CommonHeader {
-            uint8_t     Packet;
-            uint8_t[6]  Magic;            
-        };
+            uint8_t Packet;
+            uint8_t Magic[6];            
+        } __attribute__((packed));
 
         struct IdentificationHeader {
             uint32_t    VorbisVersion;
@@ -38,7 +38,5 @@ namespace OggMeta {
 
     } // namespace Vorbis
 } // namespace OggMeta
-
-namespace Ogg
 
 #endif // _OGG_VORBIS_META_H
