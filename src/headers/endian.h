@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENDIAN_H
-#define ENDIAN_H
+#ifndef _ENDIAN_H
+#define _ENDIAN_H
 
 #include <stdint.h>
 
@@ -20,4 +20,4 @@ namespace Endian
     uint64_t BigEndian64(uint64_t value);
 }
 
-#endif // ENDIAN_H
+#endif // _ENDIAN_H

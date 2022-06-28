@@ -82,9 +82,9 @@ void OGG::LoadVorbisHeaders()
     Vorbis::CommonHeader* common = new Vorbis::CommonHeader;
     fread(common, sizeof(uint8_t), sizeof(common), this->fp);
 
-    Vorbis::IdentificationHeader identification = new Vorbis::IdentificationHeader;
+    Vorbis::IdentificationHeader* identification = new Vorbis::IdentificationHeader;
     fread(identification, sizeof(uint8_t), sizeof(Vorbis::IdentificationHeader), this->fp);
 
-    // TODO
-
+    Vorbis::CommentsHeader* comments = new Vorbis::CommentsHeader;
+    fread(comments, sizeof(uint8_t), sizeof(Vorbis::CommentsHeader), this->fp);
 }

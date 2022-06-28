@@ -27,12 +27,28 @@ namespace OggMeta {
 
             // Framing flag says to only read 1 bit so I guess the other 7 are RESV
             uint8_t     FramingFlag : 1;
-            uint8_t     RESV : 7;
+            uint8_t     RESV        : 7;
         } __attribute__((packed));
 
         struct CommentsHeader {
+            uint32_t VendorLength;
+            // Vendor String
+            uint32_t UserCommentListLength;
 
         };
+        
+        struct Codebook {
+            
+        } __attribute__((packed));
+
+        struct SetupHeader {
+            uint8_t CodebookCount;
+            std::vector<Codebook> CodebookConfigurations;
+
+            
+        } __attribute__((packed));
+
+
 
         // struct 
 
