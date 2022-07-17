@@ -6,6 +6,22 @@
 
 #include <stdint.h>
 
+/*
+Steps to decode (according to Vorbis I Spec)
+- Decode packet type flag
+- Decode mode number
+- Decode window shape (long windows only)
+- Decode floor
+- Decode residue into residue vectors
+- Inverse channel coupling of residue vectors
+- Generate floot curve from decoded floor data
+- Compute dot product of floor and residue, producing audio spectrum vector
+- Inverse monolithic transform of audio spectrum vector, always an MDCT in Vorbis I
+- Overlap/add left-hand output of transform with right-hand output of previous frame
+- Store right-hand data from transform of current frame for further lapping
+- If not the first frame, return results of overlap/add as audio result of current frame
+*/
+
 namespace OggMeta {
     namespace Vorbis {
         #define VORBIS_OCTET "vorbis"
@@ -30,6 +46,9 @@ namespace OggMeta {
             uint8_t     RESV        : 7;
         } __attribute__((packed));
 
+        // There are different versions of vorbis applications according to the spec
+        // Currently I dont how how I am going to handle them
+
         struct CommentsHeader {
             uint32_t VendorLength;
             // Vendor String
@@ -38,12 +57,12 @@ namespace OggMeta {
         };
         
         struct Codebook {
-            
+            uint8_t Count;            
         } __attribute__((packed));
 
         struct SetupHeader {
             uint8_t CodebookCount;
-            std::vector<Codebook> CodebookConfigurations;
+            //std::vector<Codebook> CodebookConfigurations;
 
             
         } __attribute__((packed));

@@ -9,11 +9,11 @@
 class OGG
 { 
     public:
-        FILE* fp;     
-        std::vector<OggMeta::Page> pages;
+        FILE* mFile;     
+        std::vector<OggMeta::Page> mPages;
 
     public:
-        OGG(char* filepath);
+        OGG(char* _filepath);
 
         /**
          * @brief Load a new page into the pages vector
@@ -23,6 +23,7 @@ class OGG
         int LoadNewPageHeader();
 
     private:
+        size_t mFilesize;
         int CheckVorbis();
         void LoadVorbisHeaders();
 };
