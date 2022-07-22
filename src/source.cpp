@@ -2,6 +2,7 @@
 #include "ogg.h"
 #include "oggmeta.h"
 #include "Debug/debug.h"
+#include "Debug/logger.h"
 #include "errorhandler.h"
 
 /*
@@ -9,17 +10,20 @@
     not decode any other mapping formats, more information about this in the README.md
 */
 
+Logger logger;
 int main(int argc, char** argv)
 {
-    if (argc < 2) {
+    if (argc < 2) 
         ErrorHandler::err_n_die("No File Provided\nExiting...");
-    }
+
+    // Initialize Logger
+    LOG_INIT("logs/", "info")
 
     char* filepath = argv[1];
-    Debug::Print("Inputted file: %s", filepath);
+    LOG_INFO << "Inputted File: " << filepath << std::endl;
 
-    OGG* ogg = new OGG(filepath);    
-    ogg->LoadNewPageHeader();
+    OGG ogg = OGG(filepath);
+    ogg.LoadNewPageHeader();
 
     return 0;
 }

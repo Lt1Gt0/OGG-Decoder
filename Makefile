@@ -3,6 +3,7 @@ INCLUDE = -I$(SRC_DIR)/headers
 BUILD_DIR = bin
 SRC_DIR = src
 OBJ_DIR = obj
+LOG_DIR = logs
 REDIRECT_DIR = redirects
 
 #Compiler and linker things
@@ -22,6 +23,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 all: $(OBJ) 
 	@mkdir -p $(@D)
+	@mkdir -p $(LOG_DIR)
 	@mkdir -p $(REDIRECT_DIR)
 	@echo ---- Generating $^ ---
 
@@ -39,3 +41,4 @@ clean:
 	rm -rf $(BUILD_DIR)/
 	rm -rf $(OBJ_DIR)/
 	rm -rf $(REDIRECT_DIR)/
+	rm -rf $(LOG_DIR)/
