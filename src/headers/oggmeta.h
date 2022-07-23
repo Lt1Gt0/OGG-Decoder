@@ -29,8 +29,6 @@ namespace OggMeta
     struct Page {
         PageHeader* Header;
     };
-
-
 }
 
 #endif // _OGG_META_H
