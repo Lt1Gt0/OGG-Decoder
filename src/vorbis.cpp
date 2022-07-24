@@ -1,12 +1,11 @@
 #include "vorbis.h"
 #include "Debug/logger.h"
-#include "oggmeta.h"
 
 #include <tgmath.h>
 
 namespace Vorbis
 {
-    void CheckVorbisCodec(FILE* fp, int* ret, int codec)
+    void CheckCodec(FILE* fp, OggCodec* ret, int codec)
     {
         using namespace OggMeta;
 
@@ -18,10 +17,14 @@ namespace Vorbis
         fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
 
         // If the vorbis ocetet does not match, make the return value -1
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < VORBIS_OCTET_LENGTH; i++) {
             // commonHeader is not vorbis application
             if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
-                *ret = (int)OggCodec::Unknown;
+                fsetpos(fp, &pos);
+                delete commonHeader;
+                commonHeader = NULL;
+
+                *ret = OggCodec::Unknown;
                 return;
             }
         }
@@ -31,9 +34,46 @@ namespace Vorbis
         delete commonHeader;
         commonHeader = NULL;
 
-        *ret = codec;
+        *ret = (OggCodec)codec;
     }
 
+    int LoadPacket(FILE* fp)
+    {
+        using namespace OggMeta;
+        using namespace Vorbis;
+
+        CommonHeader* commonHeader = new CommonHeader;
+        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
+
+        switch ((PacketType)commonHeader->Packet) {
+            case PacketType::Identification:
+            {
+                IdentificationHeader* identification = LoadIdentificationHeader(fp);
+
+                if (identification == NULL)
+                    return INVALID_VORBIS_VERSION; 
+
+                break;
+            } 
+            case PacketType::Comment:
+            {
+                LoadCommentsHeader(fp);
+                break;
+            } 
+            case PacketType::Setup:
+            {
+                LoadSetupHeader(fp);
+                break;
+            }
+            default:
+            {
+                LOG_ERROR << "Invalid Packet Type: " << (int)commonHeader->Packet << std::endl; 
+                throw invalid_packet_type; 
+            }
+        }
+
+        return 1;
+    }
 
     IdentificationHeader* LoadIdentificationHeader(FILE* _fp)
     {
@@ -62,7 +102,7 @@ namespace Vorbis
             throw invalid_block_size;
         }
 
-        int bitstreamType = CheckBitstreamType(identification->BitrateMax, identification->BitrateNominal, identification->BitrateMin); 
+        BitstreamType bitstreamType = CheckBitstreamType(identification->BitrateMax, identification->BitrateNominal, identification->BitrateMin); 
         LOG_DEBUG << "Bitstream Type: " << (int)bitstreamType << std::endl;
         
         LOG_SUCCESS << "Loaded Identification Header" << std::endl;
@@ -71,12 +111,56 @@ namespace Vorbis
 
     CommentsHeader* LoadCommentsHeader(FILE* _fp)
     {
+        // Vector lengths and number of vectors are stored LSB first
+        // Data in comment header is OCTET aligned
+
         LOG_INFO << "Loading Comments Header" << std::endl;
-        CommentsHeader* commentsHeader = new CommentsHeader;
-        fread(commentsHeader, sizeof(uint8_t), sizeof(CommentsHeader), _fp);
+        CommentsHeader* comments = new CommentsHeader;
+        
+        // Load the vendor information 
+        fread(&comments->VendorLength, sizeof(uint32_t), 1, _fp);
+        comments->VendorString = new uint8_t[comments->VendorLength];
+        fread(&comments->VendorString, sizeof(uint8_t), comments->VendorLength, _fp);
+
+        fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, _fp);
+        
+        for (uint32_t i = 0; i < comments->UserCommentListLength; i++) {
+            Comment comment = NULL_COMMENT;
+            fread(&comment.Length, sizeof(uint32_t), 1, _fp);
+
+            comment.UserComment = new uint8_t[comment.Length];
+            fread(comment.UserComment, sizeof(uint8_t), comment.Length, _fp);
+            comments->comments.push_back(comment);  
+        }
+
+        // uncomment this code block to see comment information for whatever reason 
+        /*
+        for (Comment com : comments->comments) {
+            printf("Comment length: %d\n", com.Length);
+            
+            int i = 0;
+            while (com.UserComment[i]) {
+                printf("%c", (char)com.UserComment[i]);
+                i++;
+            }
+
+            printf("\n");
+        }
+        */ 
+
+        // Read Framing Bit and check it
+        fread(&comments->FramingBit, sizeof(uint8_t), 1, _fp);
+
+        if (!comments->FramingBit)
+            throw framing_bit_not_set;
+
+        // TODO
+        // Check for end of packet
+        // if (endOfPacket)
+            // throw end_of_packet;
         
         LOG_SUCCESS << "Loaded Comments Header" << std::endl;
-        return commentsHeader; 
+        return comments; 
     }
 
     SetupHeader* LoadSetupHeader(FILE* _fp)
@@ -120,23 +204,23 @@ namespace Vorbis
         return blockSize0 <= blockSize1; 
     }
 
-    int CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min)
+    BitstreamType CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min)
     {
         // Given in vorbis spec pg 27
         
         // max == nom == min --> fixed rate/tightly bounded/nearly fixed-rate 
         if (max == nom && max == min)
-            return (int)BitstreamType::TripleSet; 
+            return BitstreamType::TripleSet; 
         
         // only nominal --> VBR/ABR 
         if (nom && (!min && !max))
-            return (int)BitstreamType::NominalOnly; 
+            return BitstreamType::NominalOnly; 
 
         // min || min --> VBR
         if (max || min)
-            return (int)BitstreamType::VBR;
+            return BitstreamType::VBR;
 
-        return (int)BitstreamType::None; 
+        return BitstreamType::None; 
     }
 
     /* ---------- EXCEPTIONS ---------- */   
@@ -158,5 +242,15 @@ namespace Vorbis
     const char* InvalidBlockSize::what() const throw()
     {
         return "Invalid Block Size"; 
+    } 
+
+    const char* FramingBitNotSet::what() const throw()
+    {
+        return "Framing Bit Not Set"; 
+    } 
+
+    const char* EndOfPacket::what() const throw()
+    {
+        return "End Of Packet"; 
     } 
 }

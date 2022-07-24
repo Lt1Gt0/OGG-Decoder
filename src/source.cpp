@@ -23,7 +23,12 @@ int main(int argc, char** argv)
     LOG_INFO << "Inputted File: " << filepath << std::endl;
 
     OGG ogg = OGG(filepath);
-    ogg.LoadNewPageHeader();
+
+    while (ogg.LoadNewPageHeader() != INVALID_CAPTURE_PATTERN) {
+        ogg.mCodecLookup[(int)ogg.mCodecType].afterPHFunc(ogg.mFile); 
+    }
+
+    LOG_INFO << "Finished Reading after page header(s)" << std::endl; 
 
     return 0;
 }

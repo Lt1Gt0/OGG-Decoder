@@ -6,11 +6,6 @@
 
 namespace OggException
 {
-    static class InvalidCapturePattern : public std::exception
-    {
-        virtual const char* what() const throw();
-    } invalid_capture_pattern;
-    
     static class InterferingApplicationType : public std::exception
     {
         virtual const char* what() const throw();

@@ -2,11 +2,6 @@
 
 namespace OggException
 {
-    const char* InvalidCapturePattern::what() const throw()
-    {
-        return "Invalid Capture Pattern"; 
-    }
-
     const char* InterferingApplicationType::what() const throw()
     {
         return "Interfering Application Type";   

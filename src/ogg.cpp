@@ -10,6 +10,7 @@
 
 OGG::OGG(char* filepath)
 {
+    using namespace OggMeta;
     LOG_INFO << "Attempting to open file: " << filepath << std::endl;
     this->mFile = fopen(filepath, "rb");
     
@@ -25,18 +26,18 @@ OGG::OGG(char* filepath)
     LOG_INFO << "File Size: " << this->mFilesize / 1024 << "kB" << std::endl;
 
     // Initialize Class Members
-    this->mCodecType = (int)OggCodec::Unknown;
+    this->mCodecType = OggCodec::Unknown;
 
-    this->mCodecLookup[(int)OggCodec::CMML] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::FLAC] = {OggMeta::UndefinedCodec}; 
-    this->mCodecLookup[(int)OggCodec::Kate] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::Opus] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::PCM] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::Skeleton] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::Speex] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::Theora] = {OggMeta::UndefinedCodec};
-    this->mCodecLookup[(int)OggCodec::Vorbis] = {Vorbis::CheckVorbisCodec};
-    this->mCodecLookup[(int)OggCodec::Writ] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::CMML] = {OggCodec::CMML, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::FLAC] = {OggCodec::FLAC, UndefinedCodec, NoAfterPageHeader}; 
+    this->mCodecLookup[(int)OggCodec::Kate] = {OggCodec::Kate, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::Opus] = {OggCodec::Opus, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::PCM] = {OggCodec::PCM, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::Skeleton] = {OggCodec::Skeleton, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::Speex] = {OggCodec::Speex, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::Theora] = {OggCodec::Theora, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)OggCodec::Vorbis] = {OggCodec::Vorbis, Vorbis::CheckCodec, Vorbis::LoadPacket};
+    this->mCodecLookup[(int)OggCodec::Writ] = {OggCodec::Writ, UndefinedCodec, NoAfterPageHeader};
 }
 
 int OGG::LoadNewPageHeader()
@@ -46,13 +47,22 @@ int OGG::LoadNewPageHeader()
     LOG_DEBUG << "Loading new page" << std::endl;
     Page page = NULL_PAGE;
 
+    // Store current file position incase capture pattern is invalid
+    fpos_t prevPos;
+    fgetpos(this->mFile, &prevPos);
+
     page.Header = new PageHeader;
 
     // Load everything in the page header excluding the segment table because it is a variable size
     fread(page.Header, sizeof(uint8_t), sizeof(PageHeader) - sizeof(uint8_t*), this->mFile);
 
-    if (Endian::BigEndian32(page.Header->CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN)
-        throw OggException::invalid_capture_pattern;
+    if (Endian::BigEndian32(page.Header->CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN) {
+        // Restore Previous file position and clean up loaded page header
+        fsetpos(this->mFile, &prevPos);
+        delete page.Header;
+        page.Header = NULL;
+        return INVALID_CAPTURE_PATTERN; 
+    }
 
     // Load the segment table
     page.Header->SegmentTable = new uint8_t[page.Header->PageSegments];
@@ -63,73 +73,30 @@ int OGG::LoadNewPageHeader()
     // Load file information to gather the application type and check for a valid one
     DetermineApplicationType();
 
-    // TODO
-    // Not the best way to do this as the application grows to support different application types
-    // but for now because I am targeting vorbis applications, just load the packet data 
-  
-    if (this->mCodecType == (int)OggCodec::Vorbis){
-        LOG_DEBUG << "Loading Vorbis Application" << std::endl;
-        LoadVorbisPacket();
-    }
-
-    // Check for different application types as this program grows
-
-    LOG_SUCCESS << "Loaded Header page" << std::endl;
-    return 1;
-}
-
-void OggMeta::UndefinedCodec(FILE* fp, int* ret, int codec)
-{
-    *ret = (int)OggCodec::Unknown;
+    LOG_SUCCESS << "Loaded page" << std::endl;
+    return PAGE_HEADER_SUCCESS;
 }
 
 void OGG::DetermineApplicationType()
 {
-    int codec;
-    for (codec = 0; codec < CODEC_COUNT && this->mCodecType == (int)OggCodec::Unknown; codec++) {
-        this->mCodecLookup[codec].check(this->mFile, &this->mCodecType, codec);
+    for (int codec = 0; codec < CODEC_COUNT && this->mCodecType == OggCodec::Unknown; codec++) {
+        this->mCodecLookup[codec].checkFunc(this->mFile, &this->mCodecType, codec);
     }
 
-    if (this->mCodecType == (int)OggCodec::Unknown)
+    if (this->mCodecType == OggCodec::Unknown)
        throw OggException::codec_type_not_found;
 
-    LOG_INFO << "Ogg Application Type: " << (int) --codec << std::endl;
+    LOG_INFO << "Ogg Application Type: " << (int)this->mCodecType << std::endl;
 }
 
-int OGG::LoadVorbisPacket()
+/* ---------- HELPER FUNCTIONS ---------- */
+void OggMeta::UndefinedCodec(FILE* fp, OggCodec* ret, int codec)
 {
-    using namespace OggMeta;
-    using namespace Vorbis;
+    *ret = OggCodec::Unknown;
+}
 
-    CommonHeader* commonHeader = new CommonHeader;
-    fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), this->mFile);
-
-    switch (commonHeader->Packet) {
-        case (uint8_t)PacketType::Identification:
-        {
-            IdentificationHeader* identification = LoadIdentificationHeader(this->mFile);
-
-            if (identification == NULL)
-                return INVALID_VORBIS_VERSION; 
-
-            break;
-        } 
-        case (uint8_t)PacketType::Comment:
-        {
-            LoadCommentsHeader(this->mFile);
-            break;
-        } 
-        case (uint8_t)PacketType::Setup:
-        {
-            LoadSetupHeader(this->mFile);
-            break;
-        }
-        default:
-        {
-            LOG_ERROR << "Invalid Packet Type: " << (int)commonHeader->Packet << std::endl; 
-            throw invalid_packet_type; 
-        }
-    }
-
+int OggMeta::NoAfterPageHeader(FILE* fp)
+{
+    // Default to returning 1 as a success code 
     return 1;
 }

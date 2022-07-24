@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <exception>
 #include <stdio.h>
+#include <vector>
 
 /*
 Steps to decode (according to Vorbis I Spec)
@@ -16,7 +17,7 @@ Steps to decode (according to Vorbis I Spec)
 - Decode floor
 - Decode residue into residue vectors
 - Inverse channel coupling of residue vectors
-- Generate floot curve from decoded floor data
+- Generate floor curve from decoded floor data
 - Compute dot product of floor and residue, producing audio spectrum vector
 - Inverse monolithic transform of audio spectrum vector, always an MDCT in Vorbis I
 - Overlap/add left-hand output of transform with right-hand output of previous frame
@@ -25,9 +26,11 @@ Steps to decode (according to Vorbis I Spec)
 */
 
 namespace Vorbis {
-    #define VORBIS_OCTET "vorbis"
+    #define VORBIS_OCTET            "vorbis"
+    #define VORBIS_OCTET_LENGTH     6 
+    #define INVALID_VORBIS_VERSION  -1
 
-    #define INVALID_VORBIS_VERSION -1
+    #define NULL_COMMENT {0, nullptr}
 
     enum class PacketType : uint8_t {
         Identification  = 0x01,
@@ -76,13 +79,19 @@ namespace Vorbis {
     } __attribute__((packed));
 
     // There are different versions of vorbis applications according to the spec
-    // Currently I dont how how I am going to handle them
+    // Currently I don't how how I am going to handle them
+
+    struct Comment {
+        uint32_t    Length;
+        uint8_t*    UserComment; 
+    };
 
     struct CommentsHeader {
         uint32_t VendorLength;
-        // Vendor String
+        uint8_t* VendorString;
         uint32_t UserCommentListLength;
-
+        std::vector<Comment> comments;
+        uint8_t FramingBit; // Read single bit as boolean
     };
     
     struct SetupHeader {
@@ -105,8 +114,9 @@ namespace Vorbis {
         uint8_t Count;            
     } __attribute__((packed));
 
-    void CheckVorbisCodec(FILE* fp, int* ret, int codec);
+    void CheckCodec(FILE* fp, OggCodec* ret, int codec);
 
+    int LoadPacket(FILE* fp);
     IdentificationHeader* LoadIdentificationHeader(FILE* _fp);
     CommentsHeader* LoadCommentsHeader(FILE* _fp);
     SetupHeader* LoadSetupHeader(FILE* _fp);
@@ -126,7 +136,7 @@ namespace Vorbis {
      * @param nom - Bitrate nominal
      * @param min - Bitrate minimum
      */
-    int CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min);
+    BitstreamType CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min);
 
     /* ---------- EXCEPTIONS ---------- */   
     static class InvalidPacketType : public std::exception
@@ -148,6 +158,16 @@ namespace Vorbis {
     {
         virtual const char* what() const throw(); 
     } invalid_block_size;
+
+    static class FramingBitNotSet : public std::exception
+    {
+        virtual const char* what() const throw(); 
+    } framing_bit_not_set;
+    
+    static class EndOfPacket : public std::exception
+    {
+        virtual const char* what() const throw(); 
+    } end_of_packet;
 }
 
 #endif // _OGG_VORBIS_APPLICATION_H

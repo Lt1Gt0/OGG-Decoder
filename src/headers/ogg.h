@@ -6,16 +6,20 @@
 #include <stdio.h>
 #include "oggmeta.h"
 
+#define PAGE_HEADER_ERROR       (-1)
+#define PAGE_HEADER_SUCCESS     (0)
+#define INVALID_CAPTURE_PATTERN (1)
+
 class OGG
 { 
     public:
         FILE* mFile;  
-        int mCodecType;
+        OggCodec mCodecType;
+        OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
         std::vector<OggMeta::Page> mPages;
 
     private:
         size_t mFilesize;
-        OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
         
     public:
         OGG(char* _filepath);
@@ -23,11 +27,10 @@ class OGG
         /**
          * Load a new page into the pages vector
          * 
-         * @return (int) status : 0 = success, 1 = failure 
+         * @return (int) status : 0 = success, -1 = failure 
          */
         int LoadNewPageHeader();
 
-    private:
         /**
          * Determine the application type for a given ogg file and
          * update mApplicationType. If no application types are found
@@ -35,17 +38,7 @@ class OGG
          * (perferably OggApplications::Unknown)
          */
         void DetermineApplicationType();
-
-        /**
-         * Check for a possible a vorbis octet in a filestream 
-         */
-        int CheckVorbisApplication();
-
-        /**
-         * Load packet information for a vorbis application
-         * (identification/comments/common)
-         */
-        int LoadVorbisPacket();
+    private:
 };
 
 #endif // _OGG_H

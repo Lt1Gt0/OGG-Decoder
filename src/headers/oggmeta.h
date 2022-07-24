@@ -2,17 +2,17 @@
 #ifndef _OGG_META_H
 #define _OGG_META_H
 
-#include "vorbis.h"
-
 #include <stdint.h>
 #include <stdio.h>
 
-#define VALID_CAPTURE_PATTERN 0x4F676753
-#define NULL_PAGE {NULL}
-#define CODEC_COUNT 10
+/* 
+ * TODO - Move this enum into a more appropriate file so I 
+ * don't have to look at an header include after declarations
+ * again (I swear I know to code)
+ */
 
 /**
- * Different Ogg Application types that I know exist
+ * Different Ogg Codec types that I know exist
  */
 enum class OggCodec : int {
     CMML,
@@ -28,6 +28,13 @@ enum class OggCodec : int {
     Unknown,
 };
 
+#include "vorbis.h"
+
+#define RAW_PACKET_LOGICAL_DIVIDER 255
+#define VALID_CAPTURE_PATTERN 0x4F676753
+#define NULL_PAGE {NULL}
+#define CODEC_COUNT 10
+
 namespace OggMeta 
 {
     /**
@@ -35,23 +42,38 @@ namespace OggMeta
      * what type of codec a loaded file is
      *
      * @param FILE* - file to read from
-     * @param int* - modifiable value/return value (if the file is not
-     * the given codec type set return to Codec::Unknown, otherwise return
+     * @param OggCodec* - modifiable value/return value (if the file is not
+     * the given codec type set return to OggCodec::Unknown, otherwise return
      * set the value of *ret to value of the codec from the OggCodec enum)
      * @param int - codec type from OggCodec enum
      */
-    typedef void (*CheckCodec)(FILE*, int*, int);
-    void UndefinedCodec(FILE* fp, int* ret, int codec);
+    typedef void (*CheckCodec)(FILE*, OggCodec*, int);
+    void UndefinedCodec(FILE* fp, OggCodec* ret, int codec);
+   
+    /**
+     * Allow a codec to run a functions that it needs after loading
+     * a page header from a given ogg file
+     *
+     * @param FILE* - file
+     *
+     * @return (int) - Status
+     */
+    typedef int (*AfterPageHeader)(FILE*);
+    int NoAfterPageHeader(FILE*);
 
     struct CodecEntry {
-        CheckCodec  check;
+        OggCodec        codec;
+        CheckCodec      checkFunc;
+        AfterPageHeader afterPHFunc;
     };
 
 
-    enum HeaderTypeFlagMask : uint8_t {
-
-    };
+    enum class HdrTypeBitFlags : uint8_t {
+        PacketType  = 0x01, // unset = fresh packet, set = continued packet
+        FirstPage   = 0x02, // unset = first page of logical bitstream, set = first page of logical bitstream (bos) 
+        LastPage    = 0x04, // unset, Not last page, set = last page
     
+    };
     /* 
      * Fields with more than 1 byte length
      * are encoded LSB first
