@@ -1,9 +1,10 @@
 #include "ogg.h"
-#include "vorbis.h"
 #include "endian.h"
-#include "Debug/debug.h"
 #include "Debug/logger.h"
 #include "oggexceptions.h"
+
+// Codec Includes
+#include "vorbis.h"
 
 #include <stdlib.h>
 
@@ -24,7 +25,18 @@ OGG::OGG(char* filepath)
     LOG_INFO << "File Size: " << this->mFilesize / 1024 << "kB" << std::endl;
 
     // Initialize Class Members
-    this->mApplicationType = (int)OggApplications::Unknown;
+    this->mCodecType = (int)OggCodec::Unknown;
+
+    this->mCodecLookup[(int)OggCodec::CMML] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::FLAC] = {OggMeta::UndefinedCodec}; 
+    this->mCodecLookup[(int)OggCodec::Kate] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::Opus] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::PCM] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::Skeleton] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::Speex] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::Theora] = {OggMeta::UndefinedCodec};
+    this->mCodecLookup[(int)OggCodec::Vorbis] = {Vorbis::CheckVorbisCodec};
+    this->mCodecLookup[(int)OggCodec::Writ] = {OggMeta::UndefinedCodec};
 }
 
 int OGG::LoadNewPageHeader()
@@ -36,11 +48,13 @@ int OGG::LoadNewPageHeader()
 
     page.Header = new PageHeader;
 
+    // Load everything in the page header excluding the segment table because it is a variable size
     fread(page.Header, sizeof(uint8_t), sizeof(PageHeader) - sizeof(uint8_t*), this->mFile);
 
-    if (!(Endian::BigEndian32(page.Header->CapturePattern) == (uint32_t)VALID_CAPTURE_PATTERN))
+    if (Endian::BigEndian32(page.Header->CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN)
         throw OggException::invalid_capture_pattern;
 
+    // Load the segment table
     page.Header->SegmentTable = new uint8_t[page.Header->PageSegments];
     fread(page.Header->SegmentTable, sizeof(uint8_t), page.Header->PageSegments, this->mFile);
 
@@ -48,14 +62,12 @@ int OGG::LoadNewPageHeader()
 
     // Load file information to gather the application type and check for a valid one
     DetermineApplicationType();
-    if (this->mApplicationType == (int)OggApplications::Unknown)
-        throw OggException::unknown_application_type;
 
     // TODO
     // Not the best way to do this as the application grows to support different application types
     // but for now because I am targeting vorbis applications, just load the packet data 
   
-    if (this->mApplicationType == (int)OggApplications::OggVorbis){
+    if (this->mCodecType == (int)OggCodec::Vorbis){
         LOG_DEBUG << "Loading Vorbis Application" << std::endl;
         LoadVorbisPacket();
     }
@@ -66,39 +78,22 @@ int OGG::LoadNewPageHeader()
     return 1;
 }
 
-void OGG::DetermineApplicationType()
+void OggMeta::UndefinedCodec(FILE* fp, int* ret, int codec)
 {
-    // TODO - Work on a better way to determine to correct application
-    // type within a ogg file
-    CheckVorbisApplication();
+    *ret = (int)OggCodec::Unknown;
 }
 
-int OGG::CheckVorbisApplication()
+void OGG::DetermineApplicationType()
 {
-    using namespace OggMeta;
-
-    // Store the current position of the file
-    fpos_t pos;
-    fgetpos(this->mFile, &pos);
-
-    Vorbis::CommonHeader* commonHeader = new Vorbis::CommonHeader;
-    fread(commonHeader, sizeof(uint8_t), sizeof(Vorbis::CommonHeader), this->mFile);
-
-    for (int i = 0; i < 6; i++) {
-        // commonHeader is not vorbis application
-        if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
-            return 0;
-        }
+    int codec;
+    for (codec = 0; codec < CODEC_COUNT && this->mCodecType == (int)OggCodec::Unknown; codec++) {
+        this->mCodecLookup[codec].check(this->mFile, &this->mCodecType, codec);
     }
 
-    // Restore file to previous state
-    fsetpos(this->mFile, &pos);
-    delete commonHeader;
-    commonHeader = NULL;
+    if (this->mCodecType == (int)OggCodec::Unknown)
+       throw OggException::codec_type_not_found;
 
-    this->mApplicationType = (int)OggApplications::OggVorbis;
-    LOG_INFO << "Ogg Application Type: " << (int)this->mApplicationType << std::endl;
-    return 1;
+    LOG_INFO << "Ogg Application Type: " << (int) --codec << std::endl;
 }
 
 int OGG::LoadVorbisPacket()

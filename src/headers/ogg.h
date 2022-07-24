@@ -6,38 +6,16 @@
 #include <stdio.h>
 #include "oggmeta.h"
 
-/**
- * Different Ogg Application types that I know exist
- */
-enum class OggApplications : int {
-    CMML,
-    OggCLET,
-    OggDirac,
-    OggKate,
-    OggMIDI,
-    OggMNG,
-    OggPCM,
-    OggSpeex,
-    OggSpots,
-    OggSRT,
-    OggText,
-    OggTheora,
-    OggUVS,
-    OggVorbis,
-    OggYUV4MPEG,
-    Tracking,
-    Unknown
-};
-
 class OGG
 { 
     public:
         FILE* mFile;  
-        int mApplicationType;
+        int mCodecType;
         std::vector<OggMeta::Page> mPages;
 
     private:
         size_t mFilesize;
+        OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
         
     public:
         OGG(char* _filepath);

@@ -16,10 +16,15 @@ namespace OggException
         virtual const char* what() const throw();
     } interfering_application_type;
     
-    static class UnknownApplicationType : public std::exception
+    static class UnsupportedCodecType : public std::exception
     {
         virtual const char* what() const throw();
-    } unknown_application_type;
+    } unsupported_codec_type;
+    
+    static class CodecTypeNotFound : public std::exception
+    {
+        virtual const char* what() const throw();
+    } codec_type_not_found;
 }
 
 #endif // _OGG_EXCEPTIONS_H

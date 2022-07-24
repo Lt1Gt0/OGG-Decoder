@@ -6,13 +6,19 @@ namespace OggException
     {
         return "Invalid Capture Pattern"; 
     }
+
     const char* InterferingApplicationType::what() const throw()
     {
         return "Interfering Application Type";   
     }
     
-    const char* UnknownApplicationType::what() const throw()
+    const char* UnsupportedCodecType::what() const throw()
     {
-        return "Interfering Application Type";   
+        return "Unsupported Codec Type";   
+    }
+    
+    const char* CodecTypeNotFound::what() const throw()
+    {
+        return "Codec Type Not Found"; 
     }
 }

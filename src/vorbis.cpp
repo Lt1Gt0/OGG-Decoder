@@ -1,9 +1,40 @@
 #include "vorbis.h"
 #include "Debug/logger.h"
+#include "oggmeta.h"
+
 #include <tgmath.h>
 
 namespace Vorbis
 {
+    void CheckVorbisCodec(FILE* fp, int* ret, int codec)
+    {
+        using namespace OggMeta;
+
+        // Store the current position of the file
+        fpos_t pos;
+        fgetpos(fp, &pos);
+
+        Vorbis::CommonHeader* commonHeader = new CommonHeader;
+        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
+
+        // If the vorbis ocetet does not match, make the return value -1
+        for (int i = 0; i < 6; i++) {
+            // commonHeader is not vorbis application
+            if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
+                *ret = (int)OggCodec::Unknown;
+                return;
+            }
+        }
+
+        // Restore file to previous state
+        fsetpos(fp, &pos);
+        delete commonHeader;
+        commonHeader = NULL;
+
+        *ret = codec;
+    }
+
+
     IdentificationHeader* LoadIdentificationHeader(FILE* _fp)
     {
         LOG_INFO << "Loading Identification Header" << std::endl;
@@ -81,7 +112,7 @@ namespace Vorbis
                 validBlock1 = true;     
         } 
 
-        // Case in which oneor both block sizes are invalid
+        // Case in which one or both block sizes are invalid
         if (!(validBlock0 && validBlock1))
             return false;
 

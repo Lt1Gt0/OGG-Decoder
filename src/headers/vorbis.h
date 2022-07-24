@@ -105,6 +105,7 @@ namespace Vorbis {
         uint8_t Count;            
     } __attribute__((packed));
 
+    void CheckVorbisCodec(FILE* fp, int* ret, int codec);
 
     IdentificationHeader* LoadIdentificationHeader(FILE* _fp);
     CommentsHeader* LoadCommentsHeader(FILE* _fp);

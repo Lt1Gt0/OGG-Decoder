@@ -12,18 +12,12 @@ I am aware of different libraries that do the work of decoding files like [ffmpe
 extensively so I don't know if each one is possible
 implement from an open source standpoint)
   - [ ] CMML
-  - [ ] OggCLET
-  - [ ] OggDirac
-  - [ ] OggKate
-  - [ ] OggMIDI
-  - [ ] OggMNG
-  - [ ] OggPCM
-  - [ ] OggSpeex
-  - [ ] OggSpots
-  - [ ] OggSRT
-  - [ ] OggText
-  - [ ] OggTheora
-  - [ ] OggUVS
-  - [ ] OggVorbis (Current work in progress)
-  - [ ] OggYUV4MPEG
-  - [ ] Tracking
+  - [ ] FLAC
+  - [ ] Kate
+  - [ ] Opus
+  - [ ] PCM
+  - [ ] Skeleton
+  - [ ] Speex
+  - [ ] Theora
+  - [ ] Vorbis
+  - [ ] Writ
