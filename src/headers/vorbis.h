@@ -3,6 +3,7 @@
 #define _OGG_VORBIS_APPLICATION_H
 
 #include "oggmeta.h"
+#include "common.h"
 
 #include <stdint.h>
 #include <exception>
@@ -59,8 +60,8 @@ namespace Vorbis {
     };
 
     struct CommonHeader {
-        uint8_t Packet;
-        uint8_t Magic[6];            
+        byte    Packet;
+        octet   Magic[6];            
     } __attribute__((packed));
 
     struct IdentificationHeader {
@@ -76,25 +77,28 @@ namespace Vorbis {
         uint8_t     BlockSize;
 
         // Framing flag says to only read 1 bit so I guess the other 7 are RESV
-        uint8_t     FramingFlag : 1;
-        uint8_t     RESV        : 7;
+        uint8_t     FramingFlag;
     } __attribute__((packed));
 
     // There are different versions of vorbis applications according to the spec
     // Currently I don't how how I am going to handle them
+    
+    
 
+    /* The data in the comments are octect aligned
+     * hence the reason why I use a(ligned)Octet */
     struct Comment {
         uint32_t    Length;
-        uint8_t*    UserComment; 
-    };
+        octet*      UserComment; 
+    } __attribute__((aligned(32)));
 
     struct CommentsHeader {
         uint32_t VendorLength;
-        uint8_t* VendorString;
+        octet* VendorString;
         uint32_t UserCommentListLength;
         std::vector<Comment> comments;
-        uint8_t FramingBit; // Read single bit as boolean
-    };
+        octet FramingBit; // Read single bit as boolean
+    } __attribute__((aligned(32)));
 
     struct Codebook {
         uint8_t syncPattern[3]; 
@@ -125,8 +129,19 @@ namespace Vorbis {
         Bitstream bitstream;
     };
 
+    /**
+     * Check if the current position at a given file contains
+     * the codec signature for a vorbis mapping
+     * 
+     * @param fp - file input
+     * @param ret - OccCodec modifier, if the file contains the vorbis mapping
+     * signature the value will be changed to [codec], if not then it will 
+     * be set to OggCodec::Unknown
+     * @param codec - codec integer found in OggCodec enum 
+     */
     void CheckCodec(FILE* fp, OggCodec* ret, int codec);
 
+    int CheckNextPacketSignatue(FILE* fp);
     int LoadPacket(FILE* fp);
     IdentificationHeader* LoadIdentificationHeader(FILE* _fp);
     CommentsHeader* LoadCommentsHeader(FILE* _fp);

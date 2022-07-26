@@ -2,6 +2,7 @@
 #ifndef _OGG_META_H
 #define _OGG_META_H
 
+#include "common.h"
 #include <stdint.h>
 #include <stdio.h>
 

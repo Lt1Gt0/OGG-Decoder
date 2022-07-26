@@ -1,5 +1,6 @@
 #include "vorbis.h"
 #include "Debug/logger.h"
+#include "common.h"
 
 #include <tgmath.h>
 
@@ -37,6 +38,34 @@ namespace Vorbis
         *ret = (OggCodec)codec;
     }
 
+    int CheckNextPacketSignatue(FILE* fp)
+    {
+        // Store the current position of the file
+        fpos_t pos;
+        fgetpos(fp, &pos);
+
+        Vorbis::CommonHeader* commonHeader = new CommonHeader;
+        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
+
+        // If the vorbis ocetet does not match, make the return value -1
+        for (int i = 0; i < VORBIS_OCTET_LENGTH; i++) {
+            // commonHeader is not vorbis application
+            if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
+                fsetpos(fp, &pos);
+                delete commonHeader;
+                commonHeader = NULL;
+                return 0;
+            }
+        }
+
+        // Restore file to previous state
+        fsetpos(fp, &pos);
+        delete commonHeader;
+        commonHeader = NULL;
+
+        return 1;        
+    }
+
     int LoadPacket(FILE* fp)
     {
         using namespace OggMeta;
@@ -58,6 +87,7 @@ namespace Vorbis
             case PacketType::Comment:
             {
                 LoadCommentsHeader(fp);
+
                 break;
             } 
             case PacketType::Setup:
@@ -71,6 +101,10 @@ namespace Vorbis
                 throw invalid_packet_type; 
             }
         }
+
+        // If the next segment in the file is a packet, load again
+        if (CheckNextPacketSignatue(fp))
+            LoadPacket(fp);
 
         return 1;
     }
@@ -119,8 +153,8 @@ namespace Vorbis
         
         // Load the vendor information 
         fread(&comments->VendorLength, sizeof(uint32_t), 1, _fp);
-        comments->VendorString = new uint8_t[comments->VendorLength];
-        fread(&comments->VendorString, sizeof(uint8_t), comments->VendorLength, _fp);
+        comments->VendorString = new octet[comments->VendorLength];
+        fread(&comments->VendorString, sizeof(octet), comments->VendorLength, _fp);
 
         fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, _fp);
         
@@ -128,18 +162,17 @@ namespace Vorbis
             Comment comment = NULL_COMMENT;
             fread(&comment.Length, sizeof(uint32_t), 1, _fp);
 
-            comment.UserComment = new uint8_t[comment.Length];
-            fread(comment.UserComment, sizeof(uint8_t), comment.Length, _fp);
+            comment.UserComment = new octet[comment.Length];
+            fread(comment.UserComment, sizeof(octet), comment.Length, _fp);
             comments->comments.push_back(comment);  
         }
 
         // uncomment this code block to see comment information for whatever reason 
-        /*
         for (Comment com : comments->comments) {
             printf("Comment length: %d\n", com.Length);
             
             int i = 0;
-            while (com.UserComment[i]) {
+            while (com.UserComment[i]){
                 printf("%c", (char)com.UserComment[i]);
                 i++;
             }
@@ -148,10 +181,9 @@ namespace Vorbis
         }
 
         fflush(stdout); 
-        */ 
 
         // Read Framing Bit and check it
-        fread(&comments->FramingBit, sizeof(uint8_t), 1, _fp);
+        fread(&comments->FramingBit, sizeof(octet), 1, _fp);
 
         if (!comments->FramingBit)
             throw framing_bit_not_set;
