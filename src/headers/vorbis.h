@@ -32,8 +32,9 @@ namespace Vorbis {
     #define INVALID_VORBIS_VERSION  -1
 
     #define NULL_COMMENT            {0, nullptr}
+    #define NULL_CODEBOOK           {{0, 0, 0}, 0, {0, 0, 0}, 0, nullptr}
 
-    #define CODEBOOK_SYNC_PATTERN   0x56, 0x43, 0x42
+    constexpr byte CODEBOOK_SYNC_PATTERN[3] = {0x42, 0x43, 0x56};
 
     enum class PacketType : uint8_t {
         Identification  = 0x01,
@@ -82,8 +83,6 @@ namespace Vorbis {
 
     // There are different versions of vorbis applications according to the spec
     // Currently I don't how how I am going to handle them
-    
-    
 
     /* The data in the comments are octect aligned
      * hence the reason why I use a(ligned)Octet */
@@ -93,22 +92,25 @@ namespace Vorbis {
     } __attribute__((aligned(32)));
 
     struct CommentsHeader {
-        uint32_t VendorLength;
-        octet* VendorString;
-        uint32_t UserCommentListLength;
-        std::vector<Comment> comments;
-        octet FramingBit; // Read single bit as boolean
+        uint32_t                VendorLength;
+        octet*                  VendorString;
+        uint32_t                UserCommentListLength;
+        std::vector<Comment>    comments;
+        octet                   FramingBit; // Read single bit as boolean
     } __attribute__((aligned(32)));
 
     struct Codebook {
-        uint8_t syncPattern[3]; 
-
+        uint8_t     SyncPattern[3]; 
+        uint16_t    Dimensions;
+        uint8_t     Entries[3];
+        uint8_t     Ordered;
+        uint8_t*    CodewordLengths;
     };
     
     struct SetupHeader {
         // List of codebook configurations
-        uint8_t codebookCount;
-        Codebook* codebookConfigurations; 
+        uint8_t     codebookCount;
+        Codebook*   codebookConfigurations; 
 
         // Time-domain transform configurations (placeholders in Vorbis I)
         // Floot configurations
@@ -119,14 +121,14 @@ namespace Vorbis {
     } __attribute__((packed));
 
     struct Bitstream {
-        IdentificationHeader identification;
-        CommentsHeader comments;
-        SetupHeader setup;    
+        IdentificationHeader    identification;
+        CommentsHeader          comments;
+        SetupHeader             setup;    
     };
 
     struct Application {
-        CommonHeader common;
-        Bitstream bitstream;
+        CommonHeader    common;
+        Bitstream       bitstream;
     };
 
     /**
@@ -143,9 +145,11 @@ namespace Vorbis {
 
     int CheckNextPacketSignatue(FILE* fp);
     int LoadPacket(FILE* fp);
-    IdentificationHeader* LoadIdentificationHeader(FILE* _fp);
-    CommentsHeader* LoadCommentsHeader(FILE* _fp);
-    SetupHeader* LoadSetupHeader(FILE* _fp);
+    int VerifyCodebook(const Codebook& codebook);
+
+    IdentificationHeader* LoadIdentificationHeader(FILE* fp);
+    CommentsHeader* LoadCommentsHeader(FILE* fp);
+    SetupHeader* LoadSetupHeader(FILE* fp);
 
     /**
      * Check to see if the blocksize inside of identification header
@@ -194,6 +198,11 @@ namespace Vorbis {
     {
         virtual const char* what() const throw(); 
     } end_of_packet;
+
+    static class InvalidCodebook : public std::exception
+    {
+        virtual const char* what() const throw(); 
+    } invalid_codebook;
 }
 
 #endif // _OGG_VORBIS_APPLICATION_H

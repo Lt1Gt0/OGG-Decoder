@@ -3,9 +3,16 @@
 #include "common.h"
 
 #include <tgmath.h>
+#include <string.h>
 
 namespace Vorbis
 {
+    /* TODO
+     * I am aware that CheckCodec and CheckNextPacketSignatue both have basically the exact same
+     * code in them except for the returns im sure there is a way to make them work as one method
+     * which I might do, but for now I will keep it as is for simplicity sake
+     */
+
     void CheckCodec(FILE* fp, OggCodec* ret, int codec)
     {
         using namespace OggMeta;
@@ -109,11 +116,23 @@ namespace Vorbis
         return 1;
     }
 
-    IdentificationHeader* LoadIdentificationHeader(FILE* _fp)
+    int VerifyCodebook(const Codebook& codebook)
+    {
+        // Iterate [codebook_sync_pattern] bytes
+        for (int i = 0; i < 3; i++) {
+            //printf("cb sync: 0x%X - CB SYNC: 0x%X\n", codebook.SyncPattern[i], CODEBOOK_SYNC_PATTERN[i]);
+            if (codebook.SyncPattern[i] != CODEBOOK_SYNC_PATTERN[i])
+               return 0; 
+        }
+
+        return 1; 
+    }
+
+    IdentificationHeader* LoadIdentificationHeader(FILE* fp)
     {
         LOG_INFO << "Loading Identification Header" << std::endl;
         IdentificationHeader* identification= new IdentificationHeader;
-        fread(identification, sizeof(uint8_t), sizeof(IdentificationHeader), _fp);
+        fread(identification, sizeof(uint8_t), sizeof(IdentificationHeader), fp);
     
         if (identification->VorbisVersion != 0) {
             LOG_ERROR << "Vorbis Version: " << (int)identification->VorbisVersion << std::endl;
@@ -143,7 +162,7 @@ namespace Vorbis
         return identification;
     }
 
-    CommentsHeader* LoadCommentsHeader(FILE* _fp)
+    CommentsHeader* LoadCommentsHeader(FILE* fp)
     {
         // Vector lengths and number of vectors are stored LSB first
         // Data in comment header is OCTET aligned
@@ -152,22 +171,22 @@ namespace Vorbis
         CommentsHeader* comments = new CommentsHeader;
         
         // Load the vendor information 
-        fread(&comments->VendorLength, sizeof(uint32_t), 1, _fp);
+        fread(&comments->VendorLength, sizeof(uint32_t), 1, fp);
         comments->VendorString = new octet[comments->VendorLength];
-        fread(&comments->VendorString, sizeof(octet), comments->VendorLength, _fp);
+        fread(&comments->VendorString, sizeof(octet), comments->VendorLength, fp);
 
-        fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, _fp);
+        fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, fp);
         
         for (uint32_t i = 0; i < comments->UserCommentListLength; i++) {
             Comment comment = NULL_COMMENT;
-            fread(&comment.Length, sizeof(uint32_t), 1, _fp);
+            fread(&comment.Length, sizeof(uint32_t), 1, fp);
 
             comment.UserComment = new octet[comment.Length];
-            fread(comment.UserComment, sizeof(octet), comment.Length, _fp);
+            fread(comment.UserComment, sizeof(octet), comment.Length, fp);
             comments->comments.push_back(comment);  
         }
 
-        // uncomment this code block to see comment information for whatever reason 
+        /* uncomment this code block to see comment information for whatever reason 
         for (Comment com : comments->comments) {
             printf("Comment length: %d\n", com.Length);
             
@@ -181,9 +200,10 @@ namespace Vorbis
         }
 
         fflush(stdout); 
+        */
 
         // Read Framing Bit and check it
-        fread(&comments->FramingBit, sizeof(octet), 1, _fp);
+        fread(&comments->FramingBit, sizeof(octet), 1, fp);
 
         if (!comments->FramingBit)
             throw framing_bit_not_set;
@@ -197,14 +217,35 @@ namespace Vorbis
         return comments; 
     }
 
-    SetupHeader* LoadSetupHeader(FILE* _fp)
+    SetupHeader* LoadSetupHeader(FILE* fp)
     {
         LOG_INFO << "Loading Setup Header" << std::endl;
         SetupHeader* setup = new SetupHeader;
 
-        fread(&setup->codebookCount, sizeof(uint8_t), 1, _fp);
+        fread(&setup->codebookCount, sizeof(uint8_t), 1, fp);
         LOG_DEBUG << "Codebook count: " << (int)setup->codebookCount << std::endl; 
         
+        for (int i = 0; i < setup->codebookCount; i++) {
+            Codebook codebook = NULL_CODEBOOK;
+           
+            fread(&codebook, sizeof(uint8_t), sizeof(codebook), fp); 
+            if (!VerifyCodebook(codebook)) {
+                throw invalid_codebook;
+            }
+
+            fread(&codebook.Dimensions, sizeof(uint16_t), 1, fp);
+            fread(&codebook.Entries, sizeof(uint8_t), 3, fp);
+            fread(&codebook.Ordered,sizeof(uint8_t), 1, fp);
+
+
+            /* TODO */ 
+            //codebook.CodewordLengths = new uint8_t[codebook.Entries];
+            //fread(&codebook.CodewordLengths, sizeof(uint8_t), codebook.Entries, fp);
+
+            // Check if ordered flag is set
+            //bool flag = code
+        }
+
         LOG_SUCCESS << "Loaded Setup Header" << std::endl;
         return setup; 
     }
@@ -288,5 +329,10 @@ namespace Vorbis
     const char* EndOfPacket::what() const throw()
     {
         return "End Of Packet"; 
+    } 
+
+    const char* InvalidCodebook::what() const throw()
+    {
+        return "Invalid Codebook"; 
     } 
 }
