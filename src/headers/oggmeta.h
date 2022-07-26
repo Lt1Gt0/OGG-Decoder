@@ -8,7 +8,7 @@
 /* 
  * TODO - Move this enum into a more appropriate file so I 
  * don't have to look at an header include after declarations
- * again (I swear I know to code)
+ * again (I swear I know how to code)
  */
 
 /**
@@ -30,10 +30,10 @@ enum class OggCodec : int {
 
 #include "vorbis.h"
 
-#define RAW_PACKET_LOGICAL_DIVIDER 255
-#define VALID_CAPTURE_PATTERN 0x4F676753
-#define NULL_PAGE {NULL}
-#define CODEC_COUNT 10
+#define RAW_PACKET_LOGICAL_DIVIDER  255
+#define VALID_CAPTURE_PATTERN       0x4F676753
+#define NULL_PAGE                   {NULL}
+#define CODEC_COUNT                 10
 
 namespace OggMeta 
 {
@@ -67,13 +67,12 @@ namespace OggMeta
         AfterPageHeader afterPHFunc;
     };
 
-
     enum class HdrTypeBitFlags : uint8_t {
         PacketType  = 0x01, // unset = fresh packet, set = continued packet
         FirstPage   = 0x02, // unset = first page of logical bitstream, set = first page of logical bitstream (bos) 
         LastPage    = 0x04, // unset, Not last page, set = last page
-    
     };
+
     /* 
      * Fields with more than 1 byte length
      * are encoded LSB first

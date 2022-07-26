@@ -44,7 +44,6 @@ int OGG::LoadNewPageHeader()
 {
     using namespace OggMeta;
 
-    LOG_DEBUG << "Loading new page" << std::endl;
     Page page = NULL_PAGE;
 
     // Store current file position incase capture pattern is invalid
@@ -63,6 +62,8 @@ int OGG::LoadNewPageHeader()
         page.Header = NULL;
         return INVALID_CAPTURE_PATTERN; 
     }
+
+    LOG_DEBUG << "Loading new page" << std::endl;
 
     // Load the segment table
     page.Header->SegmentTable = new uint8_t[page.Header->PageSegments];

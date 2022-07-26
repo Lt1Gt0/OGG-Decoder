@@ -146,6 +146,8 @@ namespace Vorbis
 
             printf("\n");
         }
+
+        fflush(stdout); 
         */ 
 
         // Read Framing Bit and check it
@@ -166,11 +168,13 @@ namespace Vorbis
     SetupHeader* LoadSetupHeader(FILE* _fp)
     {
         LOG_INFO << "Loading Setup Header" << std::endl;
-        SetupHeader* setupHeader = new SetupHeader;
-        fread(setupHeader, sizeof(uint8_t), sizeof(SetupHeader), _fp);
+        SetupHeader* setup = new SetupHeader;
+
+        fread(&setup->codebookCount, sizeof(uint8_t), 1, _fp);
+        LOG_DEBUG << "Codebook count: " << (int)setup->codebookCount << std::endl; 
         
         LOG_SUCCESS << "Loaded Setup Header" << std::endl;
-        return setupHeader; 
+        return setup; 
     }
     
     bool validBlockSize(uint8_t block)

@@ -30,7 +30,9 @@ namespace Vorbis {
     #define VORBIS_OCTET_LENGTH     6 
     #define INVALID_VORBIS_VERSION  -1
 
-    #define NULL_COMMENT {0, nullptr}
+    #define NULL_COMMENT            {0, nullptr}
+
+    #define CODEBOOK_SYNC_PATTERN   0x56, 0x43, 0x42
 
     enum class PacketType : uint8_t {
         Identification  = 0x01,
@@ -93,10 +95,23 @@ namespace Vorbis {
         std::vector<Comment> comments;
         uint8_t FramingBit; // Read single bit as boolean
     };
+
+    struct Codebook {
+        uint8_t syncPattern[3]; 
+
+    };
     
     struct SetupHeader {
-        uint8_t CodebookCount;
-        //std::vector<Codebook> CodebookConfigurations;
+        // List of codebook configurations
+        uint8_t codebookCount;
+        Codebook* codebookConfigurations; 
+
+        // Time-domain transform configurations (placeholders in Vorbis I)
+        // Floot configurations
+        // Residue Configurations
+        // Channel mapping configurations
+        // mode configurations
+        // Framing bit
     } __attribute__((packed));
 
     struct Bitstream {
@@ -109,10 +124,6 @@ namespace Vorbis {
         CommonHeader common;
         Bitstream bitstream;
     };
-
-    struct Codebook {
-        uint8_t Count;            
-    } __attribute__((packed));
 
     void CheckCodec(FILE* fp, OggCodec* ret, int codec);
 
