@@ -120,8 +120,8 @@ namespace Vorbis
     {
         // Iterate [codebook_sync_pattern] bytes
         for (int i = 0; i < 3; i++) {
-            //printf("cb sync: 0x%X - CB SYNC: 0x%X\n", codebook.SyncPattern[i], CODEBOOK_SYNC_PATTERN[i]);
-            if (codebook.SyncPattern[i] != CODEBOOK_SYNC_PATTERN[i])
+            uint8_t syncByte = (codebook.raw >> ((int)CodebookOffsets::syncPattern + (i * 8))) & 0xFF;
+            if (syncByte != CODEBOOK_SYNC_PATTERN[i])
                return 0; 
         }
 
@@ -226,20 +226,37 @@ namespace Vorbis
         LOG_DEBUG << "Codebook count: " << (int)setup->codebookCount << std::endl; 
         
         for (int i = 0; i < setup->codebookCount; i++) {
-            Codebook codebook = NULL_CODEBOOK;
+            Codebook* codebook = new Codebook; 
            
-            fread(&codebook, sizeof(uint8_t), sizeof(codebook), fp); 
-            if (!VerifyCodebook(codebook)) {
+            // Load the header data for the codebook (not including the flag byte)
+            fread(&codebook->raw, sizeof(uint64_t), 1, fp); 
+            if (!VerifyCodebook(*codebook)) {
                 throw invalid_codebook;
             }
 
-            fread(&codebook.Dimensions, sizeof(uint16_t), 1, fp);
-            fread(&codebook.Entries, sizeof(uint8_t), 3, fp);
-            fread(&codebook.Ordered,sizeof(uint8_t), 1, fp);
-
+            // Read flag byte
+            fread(&codebook->Ordered, sizeof(uint8_t), 1, fp);
 
             /* TODO */ 
-            //codebook.CodewordLengths = new uint8_t[codebook.Entries];
+            int codebookEntryCount = (codebook->raw >> (int)CodebookOffsets::entries) & 0xFFF;
+            codebook->CodewordLengths = new uint8_t[codebookEntryCount];
+           
+            int length = 0; 
+            if (!(codebook->Ordered & 0x1)) {
+                uint8_t sparse = (codebook->Ordered >> 1 & 0x1);
+                if (sparse) {
+                    uint8_t flag = (codebook->Ordered >> 2) & 0x1;
+                    
+                    if (flag) {
+                         
+                    } else {
+                     
+                    } 
+                } else {
+                    length = (codebook->Ordered >> 3) & 0x5; 
+                }
+            }
+
             //fread(&codebook.CodewordLengths, sizeof(uint8_t), codebook.Entries, fp);
 
             // Check if ordered flag is set

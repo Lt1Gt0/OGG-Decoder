@@ -32,7 +32,7 @@ namespace Vorbis {
     #define INVALID_VORBIS_VERSION  -1
 
     #define NULL_COMMENT            {0, nullptr}
-    #define NULL_CODEBOOK           {{0, 0, 0}, 0, {0, 0, 0}, 0, nullptr}
+    #define NULL_CODEBOOK           {0, 0, nullptr}
 
     constexpr byte CODEBOOK_SYNC_PATTERN[3] = {0x42, 0x43, 0x56};
 
@@ -58,6 +58,12 @@ namespace Vorbis {
         VBR,
         ABR,
         None,
+    };
+
+    enum class CodebookOffsets {
+        syncPattern = 0,
+        dimensions  = 24,
+        entries     = 40, 
     };
 
     struct CommonHeader {
@@ -99,12 +105,26 @@ namespace Vorbis {
         octet                   FramingBit; // Read single bit as boolean
     } __attribute__((aligned(32)));
 
+    struct Entry {
+        int codewordLength;
+        bool used; 
+    };
+
     struct Codebook {
-        uint8_t     SyncPattern[3]; 
-        uint16_t    Dimensions;
-        uint8_t     Entries[3];
+        union {
+            struct {
+                uint64_t SyncPattern    : 24;
+                uint64_t Dimensions     : 16;
+                uint64_t Entries        : 24;
+            };
+
+            uint64_t raw;
+        };
+
         uint8_t     Ordered;
-        uint8_t*    CodewordLengths;
+        std::vector<Entry> EntryList;
+
+        //uint8_t*    CodewordLengths;
     };
     
     struct SetupHeader {
