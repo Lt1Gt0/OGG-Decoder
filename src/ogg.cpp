@@ -4,7 +4,7 @@
 #include "oggexceptions.h"
 
 // Codec Includes
-#include "vorbis.h"
+#include "vorbis/vorbis.h"
 
 #include <stdlib.h>
 

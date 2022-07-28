@@ -29,7 +29,7 @@ enum class OggCodec : int {
     Unknown,
 };
 
-#include "vorbis.h"
+#include "vorbis/vorbis.h"
 
 #define RAW_PACKET_LOGICAL_DIVIDER  255
 #define VALID_CAPTURE_PATTERN       0x4F676753

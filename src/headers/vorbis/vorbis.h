@@ -3,6 +3,7 @@
 #define _OGG_VORBIS_APPLICATION_H
 
 #include "oggmeta.h"
+#include "vorbis/codebook.h"
 #include "common.h"
 
 #include <stdint.h>
@@ -32,9 +33,6 @@ namespace Vorbis {
     #define INVALID_VORBIS_VERSION  -1
 
     #define NULL_COMMENT            {0, nullptr}
-    #define NULL_CODEBOOK           {0, 0, nullptr}
-
-    constexpr byte CODEBOOK_SYNC_PATTERN[3] = {0x42, 0x43, 0x56};
 
     enum class PacketType : uint8_t {
         Identification  = 0x01,
@@ -60,11 +58,6 @@ namespace Vorbis {
         None,
     };
 
-    enum class CodebookOffsets {
-        syncPattern = 0,
-        dimensions  = 24,
-        entries     = 40, 
-    };
 
     struct CommonHeader {
         byte    Packet;
@@ -105,32 +98,11 @@ namespace Vorbis {
         octet                   FramingBit; // Read single bit as boolean
     } __attribute__((aligned(32)));
 
-    struct Entry {
-        int codewordLength;
-        bool used; 
-    };
-
-    struct Codebook {
-        union {
-            struct {
-                uint64_t SyncPattern    : 24;
-                uint64_t Dimensions     : 16;
-                uint64_t Entries        : 24;
-            };
-
-            uint64_t raw;
-        };
-
-        uint8_t     Ordered;
-        std::vector<Entry> EntryList;
-
-        //uint8_t*    CodewordLengths;
-    };
     
     struct SetupHeader {
         // List of codebook configurations
-        uint8_t     codebookCount;
-        Codebook*   codebookConfigurations; 
+        uint8_t                 codebookCount;
+        Codebooks::Codebook*    codebookConfigurations; 
 
         // Time-domain transform configurations (placeholders in Vorbis I)
         // Floot configurations
@@ -165,7 +137,6 @@ namespace Vorbis {
 
     int CheckNextPacketSignatue(FILE* fp);
     int LoadPacket(FILE* fp);
-    int VerifyCodebook(const Codebook& codebook);
 
     IdentificationHeader* LoadIdentificationHeader(FILE* fp);
     CommentsHeader* LoadCommentsHeader(FILE* fp);
@@ -218,11 +189,8 @@ namespace Vorbis {
     {
         virtual const char* what() const throw(); 
     } end_of_packet;
-
-    static class InvalidCodebook : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } invalid_codebook;
 }
+
+int ilog(int x);
 
 #endif // _OGG_VORBIS_APPLICATION_H
