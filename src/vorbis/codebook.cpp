@@ -2,6 +2,8 @@
 #include "vorbis/vorbis.h"
 #include "Debug/logger.h"
 
+#include <ogg/ogg.h>
+
 namespace Codebooks 
 {
     /**
@@ -21,7 +23,7 @@ namespace Codebooks
         *bits = *bytes % 8;
     }
 
-    void LoadCodebooks(FILE* fp, uint8_t codebookCount)
+    void LoadCodebooks(FILE* fp, Codebook* codebookConfigurations, uint8_t codebookCount)
     {
         LOG_DEBUG << "Loading [" << (int)codebookCount << "] codebooks" << std::endl; 
         for (int i = 0; i < codebookCount; i++) {
@@ -37,23 +39,14 @@ namespace Codebooks
             // Read flag byte
             fread(&codebook->Ordered, sizeof(uint8_t), 1, fp);
 
-            // TODO 
-            //int codebookEntryCount = (codebook->raw >> (int)RawOffsets::entryCount) & 0xFFF;
-            //codebook->Entries = new Entry[codebookEntryCount];
-           
             codebook->Entries = new Entry[codebook->EntryCount]; 
             int entryIdx; 
 
             for (entryIdx = 0; entryIdx < codebook->EntryCount; entryIdx++) {
                 if (!(codebook->Ordered & 0x1)) { // Ordered Flag is unset
                     uint8_t sparse = (codebook->Ordered >> 1 & 0x1);
-
-                    // Area of proabable issue
-                    uint8_t nextByte;
-                    fread(&nextByte, sizeof(uint8_t), 1, fp);
-
                     if (sparse) {
-                        uint8_t flag = (nextByte >> 2) & 0x1;
+                        uint8_t flag = (codebook->Ordered >> 2) & 0x1;
                         if (flag) {
                             uint8_t length = (codebook->Ordered >> 3) & 0x5;
                             codebook->Entries[entryIdx].codewordLength = length + 1;
@@ -63,11 +56,11 @@ namespace Codebooks
                             codebook->Entries[entryIdx].unused = true; 
                         } 
                     } else { // Ordered Flag is set
-                        uint8_t length = (nextByte >> 3) & 0x5;
+                        uint8_t length = (codebook->Ordered >> 2) & 0x5;
                         codebook->Entries[entryIdx].codewordLength = length + 1;
                         codebook->Entries[entryIdx].unused = false; // Just incase
                     }
-                } else {
+                } else { // Ordered Flag is set
                     int bitCount;
                     int byteCount;
                     int number;
@@ -97,10 +90,8 @@ namespace Codebooks
                 }
             }
 
-            //fread(&codebook.CodewordLengths, sizeof(uint8_t), codebook.Entries, fp);
-
-            // Check if ordered flag is set
-            //bool flag = code
+            // Load the codebook data into the configuration list
+            codebookConfigurations[i] = *codebook;
         }
     }
 

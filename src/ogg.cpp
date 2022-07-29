@@ -84,6 +84,8 @@ void OGG::DetermineApplicationType()
         this->mCodecLookup[codec].checkFunc(this->mFile, &this->mCodecType, codec);
     }
 
+    // If each of the codecs in the lookup table have been checked and the 
+    // ogg codec is still unknown just terminate the program
     if (this->mCodecType == OggCodec::Unknown)
        throw OggException::codec_type_not_found;
 

@@ -11,13 +11,13 @@
 Logger logger;
 int main(int argc, char** argv)
 {
-    // Initialize Logger
-    LOG_INIT("logs/", "info")
-        
     if (argc < 2) { 
-        LOG_ERROR << "No File Provided" << std::endl;
+        printf("Usage: ./ogg_decoder <filepath>\n"); 
         exit(-1);
     }
+    
+    // Initialize Logger
+    LOG_INIT("logs/", "info")
 
     char* filepath = argv[1];
     LOG_INFO << "Inputted File: " << filepath << std::endl;

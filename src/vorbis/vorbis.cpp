@@ -8,12 +8,6 @@
 
 namespace Vorbis
 {
-    /* TODO
-     * I am aware that CheckCodec and CheckNextPacketSignatue both have basically the exact same
-     * code in them except for the returns im sure there is a way to make them work as one method
-     * which I might do, but for now I will keep it as is for simplicity sake
-     */
-
     void CheckCodec(FILE* fp, OggCodec* ret, int codec)
     {
         using namespace OggMeta;
@@ -22,56 +16,30 @@ namespace Vorbis
         fpos_t pos;
         fgetpos(fp, &pos);
 
-        Vorbis::CommonHeader* commonHeader = new CommonHeader;
-        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
+        Vorbis::CommonHeader* common= new CommonHeader;
+        fread(common, sizeof(uint8_t), sizeof(CommonHeader), fp);
 
-        // If the vorbis ocetet does not match, make the return value -1
+        // Set the file position to a previous state and delete common header
+        auto clean = [&, fp, pos, common] () mutable -> void
+        {
+            fsetpos(fp, &pos);
+            delete common;
+            common = NULL; 
+        };
+
+        // If the vorbis ocetet does not match, make the return value Unknown
         for (int i = 0; i < VORBIS_OCTET_LENGTH; i++) {
-            // commonHeader is not vorbis application
-            if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
-                fsetpos(fp, &pos);
-                delete commonHeader;
-                commonHeader = NULL;
-
+            // common is not vorbis 
+            if (common->Magic[i] != VORBIS_OCTET[i]) {
+                clean();
                 *ret = OggCodec::Unknown;
                 return;
             }
         }
 
         // Restore file to previous state
-        fsetpos(fp, &pos);
-        delete commonHeader;
-        commonHeader = NULL;
-
+        clean();
         *ret = (OggCodec)codec;
-    }
-
-    int CheckNextPacketSignatue(FILE* fp)
-    {
-        // Store the current position of the file
-        fpos_t pos;
-        fgetpos(fp, &pos);
-
-        Vorbis::CommonHeader* commonHeader = new CommonHeader;
-        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
-
-        // If the vorbis ocetet does not match, make the return value -1
-        for (int i = 0; i < VORBIS_OCTET_LENGTH; i++) {
-            // commonHeader is not vorbis application
-            if (commonHeader->Magic[i] != VORBIS_OCTET[i]) {
-                fsetpos(fp, &pos);
-                delete commonHeader;
-                commonHeader = NULL;
-                return 0;
-            }
-        }
-
-        // Restore file to previous state
-        fsetpos(fp, &pos);
-        delete commonHeader;
-        commonHeader = NULL;
-
-        return 1;        
     }
 
     int LoadPacket(FILE* fp)
@@ -79,10 +47,10 @@ namespace Vorbis
         using namespace OggMeta;
         using namespace Vorbis;
 
-        CommonHeader* commonHeader = new CommonHeader;
-        fread(commonHeader, sizeof(uint8_t), sizeof(CommonHeader), fp);
+        CommonHeader* common = new CommonHeader;
+        fread(common, sizeof(uint8_t), sizeof(CommonHeader), fp);
 
-        switch ((PacketType)commonHeader->Packet) {
+        switch ((PacketType)common->Packet) {
             case PacketType::Identification:
             {
                 IdentificationHeader* identification = LoadIdentificationHeader(fp);
@@ -105,23 +73,24 @@ namespace Vorbis
             }
             default:
             {
-                LOG_ERROR << "Invalid Packet Type: " << (int)commonHeader->Packet << std::endl; 
+                LOG_ERROR << "Invalid Packet Type: " << (int)common->Packet << std::endl; 
                 throw invalid_packet_type; 
             }
         }
 
-        // If the next segment in the file is a packet, load again
-        if (CheckNextPacketSignatue(fp))
+        // If the next segment in the file contains a vorbis packet signature load again
+        OggCodec codec = OggCodec::Unknown;
+        CheckCodec(fp, &codec, (int)OggCodec::Vorbis);
+        if (codec == OggCodec::Vorbis)
             LoadPacket(fp);
 
         return 1;
     }
 
-
     IdentificationHeader* LoadIdentificationHeader(FILE* fp)
     {
         LOG_INFO << "Loading Identification Header" << std::endl;
-        IdentificationHeader* identification= new IdentificationHeader;
+        IdentificationHeader* identification = new IdentificationHeader;
         fread(identification, sizeof(uint8_t), sizeof(IdentificationHeader), fp);
     
         if (identification->VorbisVersion != 0) {
@@ -164,7 +133,6 @@ namespace Vorbis
         fread(&comments->VendorLength, sizeof(uint32_t), 1, fp);
         comments->VendorString = new octet[comments->VendorLength];
         fread(&comments->VendorString, sizeof(octet), comments->VendorLength, fp);
-
         fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, fp);
         
         for (uint32_t i = 0; i < comments->UserCommentListLength; i++) {
@@ -216,7 +184,9 @@ namespace Vorbis
         fread(&setup->codebookCount, sizeof(uint8_t), 1, fp);
         setup->codebookCount++;
 
-        Codebooks::LoadCodebooks(fp, setup->codebookCount);
+        // Allocate memory for codebookConfigurations and load each codebook
+        setup->codebookConfigurations = new Codebooks::Codebook[setup->codebookCount];
+        Codebooks::LoadCodebooks(fp, setup->codebookConfigurations, setup->codebookCount);
 
         LOG_SUCCESS << "Loaded Setup Header" << std::endl;
         return setup; 

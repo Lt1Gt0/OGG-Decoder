@@ -10,7 +10,7 @@
 
 namespace Codebooks
 {
-    #define NULL_CODEBOOK           {0, 0, nullptr}
+    #define NULL_CODEBOOK {0, 0, nullptr}
     constexpr byte CODEBOOK_SYNC_PATTERN[3] = {0x42, 0x43, 0x56};
 
     enum class RawOffsets {
@@ -37,14 +37,11 @@ namespace Codebooks
 
         uint8_t Ordered;
         Entry*  Entries;
-
-        //uint8_t*    CodewordLengths;
     };
 
-    void LoadCodebooks(FILE* fp, uint8_t codebookCount);
+    void LoadCodebooks(FILE* fp, Codebook* codebookConfigurations, uint8_t codebookCount);
     int VerifyCodebook(const Codebook& codebook);
     
-
     /* ---------- EXCEPTIONS ---------- */   
     static class InvalidCodebook : public std::exception
     {

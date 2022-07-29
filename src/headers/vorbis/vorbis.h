@@ -105,7 +105,7 @@ namespace Vorbis {
         Codebooks::Codebook*    codebookConfigurations; 
 
         // Time-domain transform configurations (placeholders in Vorbis I)
-        // Floot configurations
+        // Floor configurations
         // Residue Configurations
         // Channel mapping configurations
         // mode configurations
@@ -135,9 +135,7 @@ namespace Vorbis {
      */
     void CheckCodec(FILE* fp, OggCodec* ret, int codec);
 
-    int CheckNextPacketSignatue(FILE* fp);
     int LoadPacket(FILE* fp);
-
     IdentificationHeader* LoadIdentificationHeader(FILE* fp);
     CommentsHeader* LoadCommentsHeader(FILE* fp);
     SetupHeader* LoadSetupHeader(FILE* fp);
