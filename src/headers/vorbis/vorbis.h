@@ -156,37 +156,6 @@ namespace Vorbis {
      * @param min - Bitrate minimum
      */
     BitstreamType CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min);
-
-    /* ---------- EXCEPTIONS ---------- */   
-    static class InvalidPacketType : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } invalid_packet_type;
-
-    static class InvalidAudioChannels : public std::exception
-    {
-        virtual const char* what() const throw();
-    } invalid_audio_channels;
-
-    static class InvalidAudioSampleRate : public std::exception
-    {
-        virtual const char* what() const throw();
-    } invalid_audio_sample_rate;
-
-    static class InvalidBlockSize : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } invalid_block_size;
-
-    static class FramingBitNotSet : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } framing_bit_not_set;
-    
-    static class EndOfPacket : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } end_of_packet;
 }
 
 int ilog(int x);

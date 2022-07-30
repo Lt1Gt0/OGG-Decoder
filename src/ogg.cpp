@@ -1,7 +1,7 @@
 #include "ogg.h"
 #include "endian.h"
 #include "Debug/logger.h"
-#include "oggexceptions.h"
+#include "common.h"
 
 // Codec Includes
 #include "vorbis/vorbis.h"
@@ -14,10 +14,8 @@ OGG::OGG(char* filepath)
     LOG_INFO << "Attempting to open file: " << filepath << std::endl;
     this->mFile = fopen(filepath, "rb");
     
-    if (this->mFile == NULL) {
-        LOG_ERROR << "Unable to load file: " << this->mFile << std::endl;
-        exit(-1);
-    }
+    if (this->mFile == NULL)
+        error(Severity::high, "Unable to load file:", this->mFile);
     
     // Get File size
     fseek(this->mFile, 0, SEEK_END);
@@ -87,7 +85,7 @@ void OGG::DetermineApplicationType()
     // If each of the codecs in the lookup table have been checked and the 
     // ogg codec is still unknown just terminate the program
     if (this->mCodecType == OggCodec::Unknown)
-       throw OggException::codec_type_not_found;
+        error(Severity::high, "Ogg:", "codec type not found -", (int)this->mCodecType);
 
     LOG_INFO << "Ogg Application Type: " << (int)this->mCodecType << std::endl;
 }

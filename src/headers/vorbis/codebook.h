@@ -41,17 +41,6 @@ namespace Codebooks
 
     void LoadCodebooks(FILE* fp, Codebook* codebookConfigurations, uint8_t codebookCount);
     int VerifyCodebook(const Codebook& codebook);
-    
-    /* ---------- EXCEPTIONS ---------- */   
-    static class InvalidCodebook : public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } invalid_codebook;
-
-    static class InvalidEntryAmount: public std::exception
-    {
-        virtual const char* what() const throw(); 
-    } invalid_entry_amount;
 }
 
 #endif // VORBIS_CODEBOOK_H

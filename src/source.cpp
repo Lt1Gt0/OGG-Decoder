@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <iostream>
 #include "ogg.h"
 #include "oggmeta.h"
+#include "common.h"
 #include "Debug/logger.h"
 
 /*
@@ -11,17 +13,13 @@
 Logger logger;
 int main(int argc, char** argv)
 {
-    if (argc < 2) { 
-        printf("Usage: ./ogg_decoder <filepath>\n"); 
-        exit(-1);
-    }
-    
     // Initialize Logger
     LOG_INIT("logs/", "info")
 
+    if (argc < 2)
+        error(Severity::high, "Usage:", ".ogg_decoder <filepath>");
+    
     char* filepath = argv[1];
-    LOG_INFO << "Inputted File: " << filepath << std::endl;
-
     OGG ogg = OGG(filepath);
 
     while (ogg.LoadNewPageHeader() != INVALID_CAPTURE_PATTERN) {

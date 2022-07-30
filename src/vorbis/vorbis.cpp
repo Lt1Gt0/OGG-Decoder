@@ -16,7 +16,7 @@ namespace Vorbis
         fpos_t pos;
         fgetpos(fp, &pos);
 
-        Vorbis::CommonHeader* common= new CommonHeader;
+        Vorbis::CommonHeader* common = new CommonHeader;
         fread(common, sizeof(uint8_t), sizeof(CommonHeader), fp);
 
         // Set the file position to a previous state and delete common header
@@ -73,8 +73,7 @@ namespace Vorbis
             }
             default:
             {
-                LOG_ERROR << "Invalid Packet Type: " << (int)common->Packet << std::endl; 
-                throw invalid_packet_type; 
+                error(Severity::high, "Vorbis:", "Invalid Packet type -", (int)common->Packet);
             }
         }
 
@@ -98,20 +97,16 @@ namespace Vorbis
             return nullptr;
         } 
 
-        if (identification->AudioChannels <= 0) {
-            LOG_ERROR << "Audio Channels: " << (int)identification->AudioChannels << std::endl;
-            throw invalid_audio_channels;
-        }
+        if (identification->AudioChannels <= 0)
+            error(Severity::high, "Vorbis:", "Audio Channels - ", identification->AudioChannels);
 
-        if (identification->AudioSampleRate <= 0) {
-            LOG_ERROR << "Audio Sample Rate: " << (int)identification->AudioChannels << std::endl;
-            throw invalid_audio_sample_rate;
-        }
+        if (identification->AudioSampleRate <= 0)
+            error(Severity::high, "Vorbis:", "Audio Sample rate - ", identification->AudioSampleRate);
 
         if (!validBlockSize(identification->BlockSize)) {
             LOG_ERROR << "Block Size 0: " << (int)std::pow(2, identification->BlockSize & 0xF) << std::endl;
             LOG_ERROR << "Block Size 1: " << (int)std::pow(2, identification->BlockSize >> 4 & 0xF) << std::endl;
-            throw invalid_block_size;
+            error(Severity::high, "Vorbis:", "Invalid Block Size");
         }
 
         BitstreamType bitstreamType = CheckBitstreamType(identification->BitrateMax, identification->BitrateNominal, identification->BitrateMin); 
@@ -164,7 +159,7 @@ namespace Vorbis
         fread(&comments->FramingBit, sizeof(octet), 1, fp);
 
         if (!comments->FramingBit)
-            throw framing_bit_not_set;
+            error(Severity::high, "Vorbis:", "Framing bit not set");
 
         // TODO
         // Check for end of packet
@@ -241,37 +236,6 @@ namespace Vorbis
 
         return BitstreamType::None; 
     }
-
-    /* ---------- EXCEPTIONS ---------- */   
-    const char* InvalidPacketType::what() const throw()
-    {
-        return "Invalid Packet Type"; 
-    }
-
-    const char* InvalidAudioChannels::what() const throw()
-    {
-        return "Invalid Audio Channel"; 
-    }
-
-    const char* InvalidAudioSampleRate::what() const throw()
-    {
-        return "Invalid Audio Sample Rate"; 
-    } 
-
-    const char* InvalidBlockSize::what() const throw()
-    {
-        return "Invalid Block Size"; 
-    } 
-
-    const char* FramingBitNotSet::what() const throw()
-    {
-        return "Framing Bit Not Set"; 
-    } 
-
-    const char* EndOfPacket::what() const throw()
-    {
-        return "End Of Packet"; 
-    } 
 }
 
 int ilog(int x)

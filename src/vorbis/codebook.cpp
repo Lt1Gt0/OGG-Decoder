@@ -2,8 +2,6 @@
 #include "vorbis/vorbis.h"
 #include "Debug/logger.h"
 
-#include <ogg/ogg.h>
-
 namespace Codebooks 
 {
     /**
@@ -31,10 +29,8 @@ namespace Codebooks
            
             // Load the header data for the codebook (not including the flag byte)
             fread(&codebook->raw, sizeof(uint64_t), 1, fp); 
-            if (!VerifyCodebook(*codebook)) {
-                LOG_ERROR << "Before crash: File Position - " << ftell(fp) << std::endl;
-                throw invalid_codebook;
-            }
+            if (!VerifyCodebook(*codebook))
+                error(Severity::medium, "Vorbis Codebook:", "before crash -", "file pos =", ftell(fp));
 
             // Read flag byte
             fread(&codebook->Ordered, sizeof(uint8_t), 1, fp);
@@ -85,7 +81,7 @@ namespace Codebooks
                         currentLegth++;
 
                         if (currentEntry > codebook->EntryCount)
-                            throw invalid_entry_amount;
+                            error(Severity::high, "Vorbis Codebook:", "Current Entry is greater than codebook entries");
                     }
                 }
             }
@@ -107,16 +103,5 @@ namespace Codebooks
 
         LOG_SUCCESS << "Verified Codebook" << std::endl;
         return 1; 
-    }
-
-    /* ---------- EXCEPTIONS ---------- */   
-    const char* InvalidCodebook::what() const throw()
-    {
-        return "Invalid Codebook"; 
-    }
-
-    const char* InvalidEntryAmount::what() const throw()
-    {
-        return "Current Entry is greater than codebook entries"; 
     }
 }

@@ -21,6 +21,9 @@ I was bored so I reinvented the wheel
 ```bash
 ./bin/ogg_decode <filepath>
 ```
+
+(If you are expecting to see output information about the decode process, most of the information will be dumped into a log file located in `logs/info_log.txt`)
+
 ## TODO
 
 - File Mappings

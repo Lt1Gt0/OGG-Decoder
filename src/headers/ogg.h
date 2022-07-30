@@ -38,7 +38,6 @@ class OGG
          * (perferably OggApplications::Unknown)
          */
         void DetermineApplicationType();
-    private:
 };
 
 #endif // _OGG_H
