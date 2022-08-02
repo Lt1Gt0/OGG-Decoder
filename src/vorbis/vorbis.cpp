@@ -8,7 +8,7 @@
 
 namespace Vorbis
 {
-    void CheckCodec(FILE* fp, OggCodec* ret, int codec)
+    OggCodec CheckCodec(FILE* fp, int codec)
     {
         using namespace OggMeta;
 
@@ -32,14 +32,13 @@ namespace Vorbis
             // common is not vorbis 
             if (common->Magic[i] != VORBIS_OCTET[i]) {
                 clean();
-                *ret = OggCodec::Unknown;
-                return;
+                return OggCodec::Unknown;
             }
         }
 
         // Restore file to previous state
         clean();
-        *ret = (OggCodec)codec;
+        return (OggCodec)codec;
     }
 
     int LoadPacket(FILE* fp)
@@ -78,9 +77,7 @@ namespace Vorbis
         }
 
         // If the next segment in the file contains a vorbis packet signature load again
-        OggCodec codec = OggCodec::Unknown;
-        CheckCodec(fp, &codec, (int)OggCodec::Vorbis);
-        if (codec == OggCodec::Vorbis)
+        if (CheckCodec(fp, (int)OggCodec::Vorbis) == OggCodec::Vorbis)
             LoadPacket(fp);
 
         return 1;
@@ -180,8 +177,7 @@ namespace Vorbis
         setup->codebookCount++;
 
         // Allocate memory for codebookConfigurations and load each codebook
-        setup->codebookConfigurations = new Codebooks::Codebook[setup->codebookCount];
-        Codebooks::LoadCodebooks(fp, setup->codebookConfigurations, setup->codebookCount);
+        setup->codebookConfigurations = Codebooks::LoadCodebooks(fp, setup->codebookCount);
 
         LOG_SUCCESS << "Loaded Setup Header" << std::endl;
         return setup; 

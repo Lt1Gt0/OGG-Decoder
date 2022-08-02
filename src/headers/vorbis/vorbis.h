@@ -133,7 +133,7 @@ namespace Vorbis {
      * be set to OggCodec::Unknown
      * @param codec - codec integer found in OggCodec enum 
      */
-    void CheckCodec(FILE* fp, OggCodec* ret, int codec);
+    OggCodec CheckCodec(FILE* fp, int codec);
 
     int LoadPacket(FILE* fp);
     IdentificationHeader* LoadIdentificationHeader(FILE* fp);

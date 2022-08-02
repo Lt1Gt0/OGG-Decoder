@@ -79,7 +79,7 @@ int OGG::LoadNewPageHeader()
 void OGG::DetermineApplicationType()
 {
     for (int codec = 0; codec < CODEC_COUNT && this->mCodecType == OggCodec::Unknown; codec++) {
-        this->mCodecLookup[codec].checkFunc(this->mFile, &this->mCodecType, codec);
+        this->mCodecType = this->mCodecLookup[codec].checkFunc(this->mFile, codec);
     }
 
     // If each of the codecs in the lookup table have been checked and the 
@@ -91,9 +91,9 @@ void OGG::DetermineApplicationType()
 }
 
 /* ---------- HELPER FUNCTIONS ---------- */
-void OggMeta::UndefinedCodec(FILE* fp, OggCodec* ret, int codec)
+OggCodec OggMeta::UndefinedCodec(FILE* fp, int codec)
 {
-    *ret = OggCodec::Unknown;
+    return OggCodec::Unknown;
 }
 
 int OggMeta::NoAfterPageHeader(FILE* fp)

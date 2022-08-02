@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <vector>
 
-#include "common.h"
+#include "vorbis/bitpacking.h"
 
 namespace Codebooks
 {
@@ -39,7 +39,7 @@ namespace Codebooks
         Entry*  Entries;
     };
 
-    void LoadCodebooks(FILE* fp, Codebook* codebookConfigurations, uint8_t codebookCount);
+    Codebook* LoadCodebooks(FILE* fp, uint8_t codebookCount);
     int VerifyCodebook(const Codebook& codebook);
 }
 

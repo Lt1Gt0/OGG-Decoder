@@ -1,6 +1,7 @@
 #include "vorbis/codebook.h"
 #include "vorbis/vorbis.h"
 #include "Debug/logger.h"
+#include "common.h"
 
 namespace Codebooks 
 {
@@ -21,9 +22,11 @@ namespace Codebooks
         *bits = *bytes % 8;
     }
 
-    void LoadCodebooks(FILE* fp, Codebook* codebookConfigurations, uint8_t codebookCount)
+    Codebook* LoadCodebooks(FILE* fp, uint8_t codebookCount)
     {
         LOG_DEBUG << "Loading [" << (int)codebookCount << "] codebooks" << std::endl; 
+
+        Codebook* codebookConfigurations = new Codebook[codebookCount];
         for (int i = 0; i < codebookCount; i++) {
             Codebook* codebook = new Codebook; 
            
@@ -89,6 +92,8 @@ namespace Codebooks
             // Load the codebook data into the configuration list
             codebookConfigurations[i] = *codebook;
         }
+
+        return codebookConfigurations;
     }
 
     int VerifyCodebook(const Codebook& codebook)

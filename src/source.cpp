@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <iostream>
 #include "ogg.h"
 #include "oggmeta.h"
 #include "common.h"
@@ -17,7 +15,7 @@ int main(int argc, char** argv)
     LOG_INIT("logs/", "info")
 
     if (argc < 2)
-        error(Severity::high, "Usage:", ".ogg_decoder <filepath>");
+        error(Severity::high, "Usage:", "./ogg_decoder <filepath>");
     
     char* filepath = argv[1];
     OGG ogg = OGG(filepath);

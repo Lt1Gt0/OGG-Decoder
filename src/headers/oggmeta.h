@@ -43,13 +43,13 @@ namespace OggMeta
      * what type of codec a loaded file is
      *
      * @param FILE* - file to read from
-     * @param OggCodec* - modifiable value/return value (if the file is not
-     * the given codec type set return to OggCodec::Unknown, otherwise return
-     * set the value of *ret to value of the codec from the OggCodec enum)
      * @param int - codec type from OggCodec enum
+     * @return OggCodec - type of codec the function will
+     * return with, if the codec is still not known just return
+     * OggCodec::Unknown;
      */
-    typedef void (*CheckCodec)(FILE*, OggCodec*, int);
-    void UndefinedCodec(FILE* fp, OggCodec* ret, int codec);
+    typedef OggCodec (*CheckCodec)(FILE*, int);
+    OggCodec UndefinedCodec(FILE* fp, int codec);
    
     /**
      * Allow a codec to run a functions that it needs after loading
