@@ -22,7 +22,7 @@ class OGG
         size_t mFilesize;
         
     public:
-        OGG(char* _filepath);
+        OGG(const char* _filepath);
 
         /**
          * Load a new page into the pages vector

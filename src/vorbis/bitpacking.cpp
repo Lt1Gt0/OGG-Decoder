@@ -26,26 +26,25 @@ byte ByteStream::ReadByte()
 
 byte ByteStream::ReadByte(size_t _byteOffset, uint8_t _bitCursor)
 {
-    this->mByteOffset = _byteOffset;
-    this->mBitCursor = _bitCursor;
-
     /* TODO */
 }
 
-uint16_t ByteStream::ReadWord()
+word ByteStream::ReadWord()
 {
     return ReadWord(this->mByteOffset, this->mBitCursor); 
 }
 
-uint16_t ByteStream::ReadWord(size_t _byteOffset, uint8_t _bitCursor)
+word ByteStream::ReadWord(size_t _byteOffset, uint8_t _bitCursor)
 {
-    this->mByteOffset = _byteOffset;
-    this->mBitCursor = _bitCursor;
-
     /* TODO */
 }
 
-uint32_t ByteStream::Read(size_t _bitCount)
+dword ByteStream::ReadDword(size_t _bitCount)
+{
+    return ReadDword(this->mByteOffset, this->mBitCursor, _bitCount);
+}
+
+dword ByteStream::ReadDword(size_t _byteOffset, uint8_t _bitCursor, size_t _bitCount)
 {
     uint32_t data;
     
@@ -58,16 +57,20 @@ uint32_t ByteStream::Read(size_t _bitCount)
     return data;
 }
 
-uint32_t ByteStream::Read(size_t _byteOffset, uint8_t _bitCursor, size_t _bitCount)
-{
-    this->mBitCursor = _bitCursor;
-    this->mByteOffset = _byteOffset;
-    return Read(_bitCount);
-}
-
-void SetBit(byte _byte, uint8_t _pos, uint8_t _val)
+void ByteStream::SetBit(byte _byte, uint8_t _pos, uint8_t _val)
 {
     
+}
+
+uint8_t ByteStream::ReadBit(byte _byte, uint8_t _pos)
+{
+    // TODO
+    return _byte >> _pos;
+}
+
+uint8_t ByteStream::ReadBit()
+{
+    return ReadBit(this->mByteOffset, this->mBitCursor);
 }
 
 /* ---------- EXCEPTIONS ---------- */  

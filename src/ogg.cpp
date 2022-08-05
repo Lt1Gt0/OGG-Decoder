@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 
-OGG::OGG(char* filepath)
+OGG::OGG(const char* filepath)
 {
     using namespace OggMeta;
     LOG_INFO << "Attempting to open file: " << filepath << std::endl;

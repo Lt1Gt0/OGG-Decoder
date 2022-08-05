@@ -9,6 +9,8 @@
 
 typedef uint8_t byte;
 typedef byte octet;
+typedef uint16_t word;
+typedef uint32_t dword;
 
 /* the maximum number of bits that are contained when writing to a byte
  * stream from the view of OGG is 32 bits */
@@ -28,15 +30,20 @@ class ByteStream {
         ByteStream();
         ~ByteStream();
         
+        // Encoder function
         void        Write(uint32_t _data); 
+        
+        // Encoder/Decoder Functions?
         byte        ReadByte();
         byte        ReadByte(size_t _byteOffset, uint8_t _bitCursor);
-        uint16_t    ReadWord();
-        uint16_t    ReadWord(size_t _byteOffset, uint8_t _bitCursor);
-        uint32_t    Read(size_t _bitCount);   
-        uint32_t    Read(size_t _byteOffset, uint8_t _bitCursor, size_t _bitCount);   
+        word        ReadWord();
+        word        ReadWord(size_t _byteOffset, uint8_t _bitCursor);
+        dword       ReadDword(size_t _bitCount);   
+        dword       ReadDword(size_t _byteOffset, uint8_t _bitCursor, size_t _bitCount);   
     private:
         void SetBit(byte _byte, uint8_t _pos, uint8_t _val);
+        uint8_t ReadBit(byte _byte, uint8_t _pos);
+        uint8_t ReadBit();
 
         /* ---------- EXCEPTIONS ---------- */  
         class OutOfRange : public std::exception
