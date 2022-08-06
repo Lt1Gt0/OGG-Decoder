@@ -31,19 +31,17 @@ class ByteStream {
         ~ByteStream();
         
         // Encoder function
-        void        Write(uint32_t _data); 
+        void        Write(uint32_t data); 
         
         // Encoder/Decoder Functions?
         byte        ReadByte();
-        byte        ReadByte(size_t _byteOffset, uint8_t _bitCursor);
+        byte        ReadByte(size_t byteOffset, uint8_t bitCursor);
         word        ReadWord();
-        word        ReadWord(size_t _byteOffset, uint8_t _bitCursor);
-        dword       ReadDword(size_t _bitCount);   
-        dword       ReadDword(size_t _byteOffset, uint8_t _bitCursor, size_t _bitCount);   
+        word        ReadWord(size_t byteOffset, uint8_t bitCursor);
+        dword       ReadDword(size_t bitCount);   
+        dword       ReadDword(size_t byteOffset, uint8_t bitCursor, size_t bitCount);   
     private:
-        void SetBit(byte _byte, uint8_t _pos, uint8_t _val);
-        uint8_t ReadBit(byte _byte, uint8_t _pos);
-        uint8_t ReadBit();
+        bool ReadBit(const dword& input, dword offset);
 
         /* ---------- EXCEPTIONS ---------- */  
         class OutOfRange : public std::exception

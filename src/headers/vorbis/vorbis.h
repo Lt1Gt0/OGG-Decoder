@@ -135,9 +135,9 @@ namespace Vorbis {
     OggCodec CheckCodec(FILE* fp, int codec);
 
     int LoadPacket(FILE* fp);
-    IdentificationHeader* LoadIdentificationHeader(FILE* fp);
-    CommentsHeader* LoadCommentsHeader(FILE* fp);
-    SetupHeader* LoadSetupHeader(FILE* fp);
+    void LoadIdentificationHeader(FILE* fp, IdentificationHeader* identification);
+    void LoadCommentsHeader(FILE* fp, CommentsHeader* comments);
+    void LoadSetupHeader(FILE* fp, SetupHeader* setup);
 
     /**
      * Check to see if the blocksize inside of identification header

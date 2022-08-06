@@ -42,30 +42,26 @@ int OGG::LoadNewPageHeader()
 {
     using namespace OggMeta;
 
-    Page page = NULL_PAGE;
+    Page page = {};
 
     // Store current file position incase capture pattern is invalid
     fpos_t prevPos;
     fgetpos(this->mFile, &prevPos);
 
-    page.Header = new PageHeader;
-
     // Load everything in the page header excluding the segment table because it is a variable size
-    fread(page.Header, sizeof(uint8_t), sizeof(PageHeader) - sizeof(uint8_t*), this->mFile);
+    fread(&page.Header, sizeof(uint8_t), sizeof(PageHeader) - sizeof(uint8_t*), this->mFile);
 
-    if (Endian::BigEndian32(page.Header->CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN) {
+    if (Endian::BigEndian32(page.Header.CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN) {
         // Restore Previous file position and clean up loaded page header
         fsetpos(this->mFile, &prevPos);
-        delete page.Header;
-        page.Header = NULL;
         return INVALID_CAPTURE_PATTERN; 
     }
 
     LOG_DEBUG << "Loading new page" << std::endl;
 
     // Load the segment table
-    page.Header->SegmentTable = new uint8_t[page.Header->PageSegments];
-    fread(page.Header->SegmentTable, sizeof(uint8_t), page.Header->PageSegments, this->mFile);
+    page.Header.SegmentTable = new uint8_t[page.Header.PageSegments];
+    fread(&page.Header.SegmentTable, sizeof(uint8_t), page.Header.PageSegments, this->mFile);
 
     mPages.push_back(page);
 

@@ -1,22 +1,17 @@
 #include "vorbis/bitpacking.h"
 
-ByteStream::ByteStream()
-{
-    this->mStream = std::vector<byte>();
-    this->mBitCursor = 0;
-    this->mByteOffset = 0;
-}
-
-ByteStream::~ByteStream()
+ByteStream::ByteStream() : 
+    mStream(std::vector<byte>()), mBitCursor(0), mByteOffset(0)
 {
 
 }
+ByteStream::~ByteStream() {}
 
 /* This method should mainly be used if I was working
  * on an encoder so I will leave it here as is */
 void ByteStream::Write(uint32_t _data)
 {
-
+    return;
 }
 
 byte ByteStream::ReadByte()
@@ -26,6 +21,12 @@ byte ByteStream::ReadByte()
 
 byte ByteStream::ReadByte(size_t _byteOffset, uint8_t _bitCursor)
 {
+    byte ret = 0;
+
+    if (_bitCursor == 0)
+        return this->mStream.at(_byteOffset);
+    
+
     /* TODO */
 }
 
@@ -57,20 +58,9 @@ dword ByteStream::ReadDword(size_t _byteOffset, uint8_t _bitCursor, size_t _bitC
     return data;
 }
 
-void ByteStream::SetBit(byte _byte, uint8_t _pos, uint8_t _val)
+bool ByteStream::ReadBit(const dword& input, dword offset)
 {
-    
-}
-
-uint8_t ByteStream::ReadBit(byte _byte, uint8_t _pos)
-{
-    // TODO
-    return _byte >> _pos;
-}
-
-uint8_t ByteStream::ReadBit()
-{
-    return ReadBit(this->mByteOffset, this->mBitCursor);
+    return input >> offset;
 }
 
 /* ---------- EXCEPTIONS ---------- */  

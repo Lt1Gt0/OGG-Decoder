@@ -91,7 +91,7 @@ namespace OggMeta
     } __attribute__((packed));
     
     struct Page {
-        PageHeader* Header;
+        PageHeader Header;
     };
 }
 

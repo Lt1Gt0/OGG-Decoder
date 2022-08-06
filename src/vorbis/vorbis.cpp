@@ -52,22 +52,24 @@ namespace Vorbis
         switch ((PacketType)common->Packet) {
             case PacketType::Identification:
             {
-                IdentificationHeader* identification = LoadIdentificationHeader(fp);
+                IdentificationHeader identification = {};
+                LoadIdentificationHeader(fp, &identification);
 
-                if (identification == NULL)
+                if (identification.VorbisVersion == (uint32_t)INVALID_VORBIS_VERSION) 
                     return INVALID_VORBIS_VERSION; 
 
                 break;
             } 
             case PacketType::Comment:
             {
-                LoadCommentsHeader(fp);
-
+                CommentsHeader comments = {};
+                LoadCommentsHeader(fp, &comments);
                 break;
             } 
             case PacketType::Setup:
             {
-                LoadSetupHeader(fp);
+                SetupHeader setup = {};
+                LoadSetupHeader(fp, &setup);
                 break;
             }
             default:
@@ -83,15 +85,15 @@ namespace Vorbis
         return 1;
     }
 
-    IdentificationHeader* LoadIdentificationHeader(FILE* fp)
+    void LoadIdentificationHeader(FILE* fp, IdentificationHeader* identification)
     {
         LOG_INFO << "Loading Identification Header" << std::endl;
-        IdentificationHeader* identification = new IdentificationHeader;
         fread(identification, sizeof(uint8_t), sizeof(IdentificationHeader), fp);
     
         if (identification->VorbisVersion != 0) {
             LOG_ERROR << "Vorbis Version: " << (int)identification->VorbisVersion << std::endl;
-            return nullptr;
+            identification->VorbisVersion = INVALID_VORBIS_VERSION;
+            return; 
         } 
 
         if (identification->AudioChannels <= 0)
@@ -110,16 +112,13 @@ namespace Vorbis
         LOG_DEBUG << "Bitstream Type: " << (int)bitstreamType << std::endl;
         
         LOG_SUCCESS << "Loaded Identification Header" << std::endl;
-        return identification;
     }
 
-    CommentsHeader* LoadCommentsHeader(FILE* fp)
+    void LoadCommentsHeader(FILE* fp, CommentsHeader* comments)
     {
         // Vector lengths and number of vectors are stored LSB first
         // Data in comment header is OCTET aligned
-
         LOG_INFO << "Loading Comments Header" << std::endl;
-        CommentsHeader* comments = new CommentsHeader;
         
         // Load the vendor information 
         fread(&comments->VendorLength, sizeof(uint32_t), 1, fp);
@@ -164,13 +163,11 @@ namespace Vorbis
             // throw end_of_packet;
         
         LOG_SUCCESS << "Loaded Comments Header" << std::endl;
-        return comments; 
     }
 
-    SetupHeader* LoadSetupHeader(FILE* fp)
+    void LoadSetupHeader(FILE* fp, SetupHeader* setup)
     {
         LOG_INFO << "Loading Setup Header" << std::endl;
-        SetupHeader* setup = new SetupHeader;
 
         // Get the codbook count + 1
         fread(&setup->codebookCount, sizeof(uint8_t), 1, fp);
@@ -180,7 +177,6 @@ namespace Vorbis
         setup->codebookConfigurations = Codebooks::LoadCodebooks(fp, setup->codebookCount);
 
         LOG_SUCCESS << "Loaded Setup Header" << std::endl;
-        return setup; 
     }
     
     bool validBlockSize(uint8_t block)
