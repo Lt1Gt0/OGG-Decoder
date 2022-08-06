@@ -1,5 +1,6 @@
 #include "vorbis/codebook.h"
 #include "vorbis/vorbis.h"
+#include "vorbis/helpers.h"
 #include "Debug/logger.h"
 #include "common.h"
 
@@ -68,7 +69,7 @@ namespace Codebooks
                     
                     while (currentEntry < codebook->EntryCount) {
                         // Read [ilog(entrycount - currentEntry)] bits from the file int [number]
-                        BitsAndBytes(ilog(codebook->EntryCount - currentEntry), &byteCount, &bitCount);
+                        BitsAndBytes(Vorbis::ilog(codebook->EntryCount - currentEntry), &byteCount, &bitCount);
                         fread(&number, sizeof(uint8_t), byteCount, fp);
                         if (bitCount > 0) {
                             uint8_t nextByte;

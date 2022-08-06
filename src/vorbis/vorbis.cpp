@@ -24,7 +24,7 @@ namespace Vorbis
         {
             fsetpos(fp, &pos);
             delete common;
-            common = NULL; 
+            common = nullptr; 
         };
 
         // If the vorbis ocetet does not match, make the return value Unknown
@@ -128,7 +128,7 @@ namespace Vorbis
         fread(&comments->UserCommentListLength, sizeof(uint32_t), 1, fp);
         
         for (uint32_t i = 0; i < comments->UserCommentListLength; i++) {
-            Comment comment = NULL_COMMENT;
+            Comment comment = {};
             fread(&comment.Length, sizeof(uint32_t), 1, fp);
 
             comment.UserComment = new octet[comment.Length];
@@ -194,8 +194,6 @@ namespace Vorbis
         int blockSize1 = std::pow(2, block >> 4 & 0xF);
         bool validBlock0 = false;
         bool validBlock1 = false;
-        constexpr int VALID_BLOCK_SIZE_COUNT = 8;
-        int validBlockSizes[VALID_BLOCK_SIZE_COUNT] = {64, 128, 256, 512, 1024, 2048, 4096, 8192};
 
         // Check if any of the block sized are not valid
         for (int i = 0; i < VALID_BLOCK_SIZE_COUNT; i++) {
@@ -232,15 +230,4 @@ namespace Vorbis
 
         return BitstreamType::None; 
     }
-}
-
-int ilog(int x)
-{
-    int ret = 0;
-    while (x > 0) {
-        ret++;
-        x >>= 1; 
-    }
-
-    return ret;
 }

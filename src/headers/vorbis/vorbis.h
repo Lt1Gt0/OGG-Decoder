@@ -28,11 +28,11 @@ Steps to decode (according to Vorbis I Spec)
 */
 
 namespace Vorbis {
-    #define VORBIS_OCTET            "vorbis"
-    #define VORBIS_OCTET_LENGTH     6 
-    #define INVALID_VORBIS_VERSION  -1
-
-    #define NULL_COMMENT            {0, nullptr}
+    constexpr int VORBIS_OCTET_LENGTH                       {6};
+    constexpr octet VORBIS_OCTET[VORBIS_OCTET_LENGTH]       {'v', 'o', 'r', 'b', 'i', 's'};
+    constexpr int INVALID_VORBIS_VERSION                    {-1};
+    constexpr int VALID_BLOCK_SIZE_COUNT                    {8};
+    constexpr int validBlockSizes[VALID_BLOCK_SIZE_COUNT]   {64, 128, 256, 512, 1024, 2048, 4096, 8192};
 
     enum class PacketType : uint8_t {
         Identification  = 0x01,
@@ -57,7 +57,6 @@ namespace Vorbis {
         ABR,
         None,
     };
-
 
     struct CommonHeader {
         byte    Packet;
@@ -157,7 +156,5 @@ namespace Vorbis {
      */
     BitstreamType CheckBitstreamType(uint32_t max, uint32_t nom, uint32_t min);
 }
-
-int ilog(int x);
 
 #endif // _OGG_VORBIS_APPLICATION_H
