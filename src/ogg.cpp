@@ -4,6 +4,7 @@
 #include "common.h"
 
 // Codec Includes
+#include "oggmeta.h"
 #include "vorbis/vorbis.h"
 
 #include <stdlib.h>
@@ -24,18 +25,26 @@ OGG::OGG(const char* filepath)
     LOG_INFO << "File Size: " << this->mFilesize / 1024 << "kB" << std::endl;
 
     // Initialize Class Members
-    this->mCodecType = OggCodec::Unknown;
+    this->mCodecType = Codec::Unknown;
 
-    this->mCodecLookup[(int)OggCodec::CMML] = {OggCodec::CMML, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::FLAC] = {OggCodec::FLAC, UndefinedCodec, NoAfterPageHeader}; 
-    this->mCodecLookup[(int)OggCodec::Kate] = {OggCodec::Kate, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::Opus] = {OggCodec::Opus, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::PCM] = {OggCodec::PCM, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::Skeleton] = {OggCodec::Skeleton, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::Speex] = {OggCodec::Speex, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::Theora] = {OggCodec::Theora, UndefinedCodec, NoAfterPageHeader};
-    this->mCodecLookup[(int)OggCodec::Vorbis] = {OggCodec::Vorbis, Vorbis::CheckCodec, Vorbis::LoadPacket};
-    this->mCodecLookup[(int)OggCodec::Writ] = {OggCodec::Writ, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Dirac] = {Codec::Dirac, UndefinedCodec, NoAfterPageHeader}; 
+    this->mCodecLookup[(int)Codec::FLAC] = {Codec::FLAC, UndefinedCodec, NoAfterPageHeader}; 
+    this->mCodecLookup[(int)Codec::Skeleton] = {Codec::Skeleton, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Writ] = {Codec::Writ, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Opus] = {Codec::Opus, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Theora] = {Codec::Theora, UndefinedCodec, NoAfterPageHeader};
+    //this->mCodecLookup[(int)Codec::Vorbis] = {Codec::Vorbis, Vorbis::CheckCodec, Vorbis::LoadPacket};
+    this->mCodecLookup[(int)Codec::Vorbis] = {Codec::Vorbis, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Clet] = {Codec::Clet, UndefinedCodec, NoAfterPageHeader}; 
+    this->mCodecLookup[(int)Codec::CMML] = {Codec::CMML, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::JNG] = {Codec::JNG, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Kate] = {Codec::Kate, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::MIDI] = {Codec::MIDI, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::MNG] = {Codec::MNG, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::PCM] = {Codec::PCM, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::PNG] = {Codec::PNG, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Speex] = {Codec::Speex, UndefinedCodec, NoAfterPageHeader};
+    this->mCodecLookup[(int)Codec::Yuv4Mpeg] = {Codec::Yuv4Mpeg, UndefinedCodec, NoAfterPageHeader};
 }
 
 int OGG::LoadNewPageHeader()
@@ -74,22 +83,22 @@ int OGG::LoadNewPageHeader()
 
 void OGG::DetermineApplicationType()
 {
-    for (int codec = 0; codec < CODEC_COUNT && this->mCodecType == OggCodec::Unknown; codec++) {
+    for (int codec = 0; codec < CODEC_COUNT && this->mCodecType == Codec::Unknown; codec++) {
         this->mCodecType = this->mCodecLookup[codec].checkFunc(this->mFile, codec);
     }
 
     // If each of the codecs in the lookup table have been checked and the 
     // ogg codec is still unknown just terminate the program
-    if (this->mCodecType == OggCodec::Unknown)
+    if (this->mCodecType == Codec::Unknown)
         error(Severity::high, "Ogg:", "codec type not found -", (int)this->mCodecType);
 
     LOG_INFO << "Ogg Application Type: " << (int)this->mCodecType << std::endl;
 }
 
 /* ---------- HELPER FUNCTIONS ---------- */
-OggCodec OggMeta::UndefinedCodec(FILE* fp, int codec)
+Codec OggMeta::UndefinedCodec(FILE* fp, int codec)
 {
-    return OggCodec::Unknown;
+    return Codec::Unknown;
 }
 
 int OggMeta::NoAfterPageHeader(FILE* fp)

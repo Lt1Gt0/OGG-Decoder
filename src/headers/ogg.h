@@ -6,15 +6,18 @@
 #include <stdio.h>
 #include "oggmeta.h"
 
-#define PAGE_HEADER_ERROR       (-1)
-#define PAGE_HEADER_SUCCESS     (0)
-#define INVALID_CAPTURE_PATTERN (1)
+enum class OggStatus {
+    PAGE_HEADER_SUCCESS,
+    PAGE_HEADER_ERROR,
+
+    INVALID_CAPTURE_PATTERN
+};
 
 class OGG
 { 
     public:
         FILE* mFile;  
-        OggCodec mCodecType;
+        Codec mCodecType;
         OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
         std::vector<OggMeta::Page> mPages;
 
@@ -38,6 +41,8 @@ class OGG
          * (perferably OggApplications::Unknown)
          */
         void DetermineApplicationType();
+
+        void DumpInfo();
 };
 
 #endif // _OGG_H
