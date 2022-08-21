@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     char* filepath = argv[1];
     OGG ogg = OGG(filepath);
 
-    while (ogg.LoadNewPageHeader() != INVALID_CAPTURE_PATTERN) {
+    while (ogg.LoadNewPageHeader() != OggStatus::INVALID_CAPTURE_PATTERN) {
         ogg.mCodecLookup[(int)ogg.mCodecType].afterPHFunc(ogg.mFile); 
     }
 

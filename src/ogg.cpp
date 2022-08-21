@@ -47,7 +47,7 @@ OGG::OGG(const char* filepath)
     this->mCodecLookup[(int)Codec::Yuv4Mpeg] = {Codec::Yuv4Mpeg, UndefinedCodec, NoAfterPageHeader};
 }
 
-int OGG::LoadNewPageHeader()
+OggStatus OGG::LoadNewPageHeader()
 {
     using namespace OggMeta;
 
@@ -63,7 +63,7 @@ int OGG::LoadNewPageHeader()
     if (Endian::BigEndian32(page.Header.CapturePattern) != (uint32_t)VALID_CAPTURE_PATTERN) {
         // Restore Previous file position and clean up loaded page header
         fsetpos(this->mFile, &prevPos);
-        return INVALID_CAPTURE_PATTERN; 
+        return OggStatus::INVALID_CAPTURE_PATTERN; 
     }
 
     LOG_DEBUG << "Loading new page" << std::endl;
@@ -78,7 +78,7 @@ int OGG::LoadNewPageHeader()
     DetermineApplicationType();
 
     LOG_SUCCESS << "Loaded page" << std::endl;
-    return PAGE_HEADER_SUCCESS;
+    return OggStatus::PAGE_HEADER_SUCCESS;
 }
 
 void OGG::DetermineApplicationType()

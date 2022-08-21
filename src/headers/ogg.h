@@ -30,9 +30,9 @@ class OGG
         /**
          * Load a new page into the pages vector
          * 
-         * @return (int) status : 0 = success, -1 = failure 
+         * @return (OggStatus) status
          */
-        int LoadNewPageHeader();
+        OggStatus LoadNewPageHeader();
 
         /**
          * Determine the application type for a given ogg file and
