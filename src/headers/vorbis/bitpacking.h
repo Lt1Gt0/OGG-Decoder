@@ -24,6 +24,12 @@ namespace Vorbis
             std::vector<byte> mStream;
             
     };
+
+    int CountBits(byte val);
+    void DumpBits(byte val);
+    void DumpBits(word val);
+    void DumpBits(dword val);
+    void DumpBits(qword val);
 }
 
 #endif // _VORBIS_BITPACKING_H
