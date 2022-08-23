@@ -6,7 +6,9 @@ namespace Vorbis
 {
     class Codebook
     {
-
+        public:
+            Codebook();
+            ~Codebook();
     };
 }
 

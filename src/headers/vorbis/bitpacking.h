@@ -18,10 +18,15 @@ namespace Vorbis
         public:
             Bitstream();
             ~Bitstream();
-
             void Insert(byte val);
 
             std::vector<byte> mStream;
+
+        private:
+            void ModifyBit(byte* val, byte offset, bool set);
+            void ModifyBit(byte* val, byte offset);
+
+            byte mBitCursor;
             
     };
 
