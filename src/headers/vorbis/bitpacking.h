@@ -2,8 +2,11 @@
 #ifndef _VORBIS_BITPACKING_H
 #define _VORBIS_BITPACKING_H
 
+#include <iostream>
 #include <stdint.h>
 #include <vector>
+#include <string>
+#include <bits/stdc++.h>
 
 typedef uint8_t byte;
 typedef byte octet;
@@ -13,28 +16,30 @@ typedef uint64_t qword;
 
 namespace Vorbis
 {
+    constexpr int BITS_IN_BYTE {8};
+
     class Bitstream
     {
         public:
             Bitstream();
             ~Bitstream();
-            void Insert(byte val);
+            void Insert(byte _val);
 
-            std::vector<byte> mStream;
+            std::vector<char*> mStream;
 
         private:
-            void ModifyBit(byte* val, byte offset, bool set);
-            void ModifyBit(byte* val, byte offset);
+            //void ModifyBit(byte* val, byte offset, bool set);
+            //void ModifyBit(byte* val, byte offset);
+            void ModifyBit(char* buf, byte offset, bool set);
 
             byte mBitCursor;
-            
     };
 
-    int CountBits(byte val);
-    void DumpBits(byte val);
-    void DumpBits(word val);
-    void DumpBits(dword val);
-    void DumpBits(qword val);
+    inline std::string DumpBits(size_t val)
+    {
+        std::string binary = std::bitset<64>(val).to_string();
+        return binary.substr(binary.find("1"), binary.size() - 1);
+    }
 }
 
 #endif // _VORBIS_BITPACKING_H

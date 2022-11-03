@@ -2,12 +2,16 @@
 #include <stdio.h>
 #include <vector>
 #include <math.h>
+#include <iostream>
+#include <bits/stdc++.h>
+#include <string.h>
 
 namespace Vorbis
 {
     Bitstream::Bitstream()
     {
-        mStream = std::vector<byte>(); 
+        mStream = std::vector<char*>(); 
+        mBitCursor = 0;
     }
 
     Bitstream::~Bitstream()
@@ -15,73 +19,43 @@ namespace Vorbis
 
     }
 
-    void Bitstream::Insert(byte val)
+    void Bitstream::Insert(byte _val)
     {
-        // TODO
-        
-        if (this->mStream.size() == 0)
-            this->mStream.push_back(0);
+        auto EmptyByteString = []() -> char* {
+            char* buf = new char[BITS_IN_BYTE]; 
+            memset(buf, '0', BITS_IN_BYTE);
+            return buf;
+        };
 
-        byte streamVal = this->mStream.back();
-        for (int i = 0; i <= Vorbis::CountBits(val); i++) {
-            if (this->mBitCursor == 7) {
-                this->mStream.push_back(streamVal);
-                this->mBitCursor = 0;
-                streamVal = 0;
+        if (mStream.size() == 0)
+            mStream.push_back(EmptyByteString());
+
+        char* streamVal = mStream.back();
+
+        for (char c : DumpBits(_val)) {
+            int bit = (c == '0') ? 0 : 1;
+
+            if (mBitCursor == 7) {
+                mStream.push_back(streamVal);
+                mBitCursor = 0;
+                streamVal = EmptyByteString();
             }    
 
-            ModifyBit(&streamVal, this->mBitCursor, (val >> (CountBits(val) - i) & 0x1));
-            this->mBitCursor++;
+            ModifyBit(streamVal, mBitCursor, bit);
+            mBitCursor++;
         }
     }
             
-    void Bitstream::ModifyBit(byte* val, byte offset)
+    //void Bitstream::ModifyBit(byte* val, byte offset)
+    void Bitstream::ModifyBit(char* buf, byte offset, bool set)
     {
-        offset = pow(2, offset - 1);
-        *val ^= offset;
+        buf[offset] = set ? '1' : '0';
+        //offset = pow(2, offset - 1);
+        //*val ^= offset;
     }
 
-    void Bitstream::ModifyBit(byte* val, byte offset, bool set)
-    {
-        // TODO
-    }
-
-    int CountBits(byte val)
-    {
-        int bits = 0;
-        while (val) {
-            bits++;
-            val >>= 1;
-        }
-
-        return bits;
-    }
-
-    void DumpBits(byte val)
-    {
-        byte bitCount = CountBits(val);
-        for (int i = 0; i <= bitCount; i++) {
-            if ((i - 1) % 4 == 0)
-                printf(" "); 
-
-            printf("%d", (val >> (bitCount - i)) & 0x1);
-        }
-
-        printf("\n");
-    }
-
-    void DumpBits(word val)
-    {
-
-    }
-
-    void DumpBits(dword val)
-    {
-
-    }
-
-    void DumpBits(qword val)
-    {
-
-    }
+    //void Bitstream::ModifyBit(byte* val, byte offset, bool set)
+    //{
+        //// TODO
+    //}
 }

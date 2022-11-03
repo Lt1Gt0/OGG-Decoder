@@ -3,36 +3,27 @@
 #define _OGG_H
 
 #include <vector>
+#include <string>
 #include <stdio.h>
 #include "oggmeta.h"
 
-enum class OggStatus {
-    PAGE_HEADER_SUCCESS,
-    PAGE_HEADER_ERROR,
-
-    INVALID_CAPTURE_PATTERN
+enum OggStatus : int {
+    PAGE_HEADER_SUCCESS     = 0,
+    PAGE_HEADER_ERROR       = -1,
+    INVALID_CAPTURE_PATTERN = -1,
 };
 
 class OGG
 { 
     public:
-        FILE* mFile;  
-        Codec mCodecType;
-        OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
-        std::vector<OggMeta::Page> mPages;
-
-    private:
-        size_t mFilesize;
-        
-    public:
-        OGG(const char* _filepath);
+        OGG(std::string _filepath);
 
         /**
          * Load a new page into the pages vector
          * 
          * @return (OggStatus) status
          */
-        OggStatus LoadNewPageHeader();
+        //OggStatus LoadNewPageHeader();
 
         /**
          * Determine the application type for a given ogg file and
@@ -40,9 +31,18 @@ class OGG
          * then mApplicationType will stay the same as it was before
          * (perferably OggApplications::Unknown)
          */
-        void DetermineApplicationType();
+        //void DetermineApplicationType();
 
-        void DumpInfo();
+        //void DumpInfo();
+
+        FILE* mFile;  
+        //Codec mCodecType;
+        //OggMeta::CodecEntry mCodecLookup[CODEC_COUNT];
+        //std::vector<OggMeta::Page> mPages;
+
+    private:
+        size_t mFilesize;
+        
 };
 
 #endif // _OGG_H
