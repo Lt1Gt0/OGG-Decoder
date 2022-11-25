@@ -7,12 +7,14 @@
 #include <vector>
 #include <string>
 #include <bits/stdc++.h>
+#include <cstddef>
 
 typedef uint8_t byte;
 typedef byte octet;
 typedef uint16_t word;
 typedef uint32_t dword;
 typedef uint64_t qword;
+typedef char byteString[8];
 
 namespace Vorbis
 {
@@ -23,16 +25,20 @@ namespace Vorbis
         public:
             Bitstream();
             ~Bitstream();
-            void Insert(byte _val);
 
+            //template<typename T>
+            //void Insert(T _val);
+            void Insert(uint32_t _val);
+
+            //std::vector<char*> mStream;
             std::vector<char*> mStream;
 
         private:
             //void ModifyBit(byte* val, byte offset, bool set);
             //void ModifyBit(byte* val, byte offset);
-            void ModifyBit(char* buf, byte offset, bool set);
+            void ModifyBit(char* buf, int offset, bool set);
 
-            byte mBitCursor;
+            int mBitCursor;
     };
 
     inline std::string DumpBits(size_t val)

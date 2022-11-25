@@ -6,7 +6,7 @@ LOG_DIR = logs
 
 #Compiler and linker things
 CC = g++
-CCFLAGS = -g -Wall -Wextra
+CCFLAGS = -g -Wall -Wextra -std=c++17
 #CCFLAGS += -Wno-write-strings # figure out how to make a make recipe for suppressed warnings rather than forcing it
 LD = ld
 LDFLAGS = 

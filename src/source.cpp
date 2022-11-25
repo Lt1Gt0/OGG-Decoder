@@ -21,7 +21,10 @@ int main(int argc, char** argv)
         error(Severity::high, "Usage:", "./ogg-decoder <filepath>");
     
     Vorbis::Bitstream bitstream;
-    bitstream.Insert(4);
+    bitstream.Insert(1);
+    //bitstream.Insert<uint8_t>(12);
+    //bitstream.Insert<int8_t>(-1);
+    //bitstream.Insert<int8_t>(-1);
 
     for (char* str : bitstream.mStream) {
         std::cout << str << std::endl;
