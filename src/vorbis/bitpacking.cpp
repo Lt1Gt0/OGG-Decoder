@@ -42,7 +42,7 @@ namespace Vorbis
 {
     Bitstream::Bitstream()
     {
-        mStream = std::vector<char*>(); 
+        mStream = std::vector<BitPattern>(); 
         mBitCursor = 0;
     }
 
@@ -53,38 +53,32 @@ namespace Vorbis
 
     void Bitstream::Insert(uint32_t _val) 
     {
-        auto EmptyByteString = []() -> char* 
+        auto EmptBitPattern = []() -> BitPattern 
         {
-            char* buf = new byteString; 
-            memset(buf, '\0', sizeof(byteString));
-            return buf;
+            BitPattern pattern; 
+            pattern.mBuf = new char[8];
+            memset(pattern.mBuf, '0', sizeof(char) * 8);
+            return pattern;
         };
 
         if (mStream.size() == 0)
-            mStream.push_back(EmptyByteString());
+            mStream.push_back(EmptBitPattern());
 
-        char* streamVal = mStream.back();
+        BitPattern streamVal = mStream.back();
+        mStream.pop_back();
 
         for (char c : DumpBits(_val)) {
-            int bit = (c == '0') ? 0 : 1;
-
             if (mBitCursor == 7) {
                 mStream.push_back(streamVal);
                 mBitCursor = 0;
-                streamVal = EmptyByteString();
+                streamVal = EmptBitPattern();
             }    
 
-            ModifyBit(streamVal, mBitCursor, bit);
+            streamVal.mBuf[mBitCursor] = c;
             mBitCursor++;
         }
-    }
-            
-    //void Bitstream::ModifyBit(byte* val, byte offset)
-    void Bitstream::ModifyBit(char* buf, int offset, bool set)
-    {
-        buf[offset] = set ? '1' : '0';
-        //offset = pow(2, offset - 1);
-        //*val ^= offset;
+
+        mStream.push_back(streamVal);
     }
 
     //void Bitstream::ModifyBit(byte* val, byte offset, bool set)

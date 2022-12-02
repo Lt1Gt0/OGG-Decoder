@@ -18,7 +18,10 @@ typedef char byteString[8];
 
 namespace Vorbis
 {
-    constexpr int BITS_IN_BYTE {8};
+
+    struct BitPattern {
+        char* mBuf;
+    };
 
     class Bitstream
     {
@@ -31,12 +34,11 @@ namespace Vorbis
             void Insert(uint32_t _val);
 
             //std::vector<char*> mStream;
-            std::vector<char*> mStream;
+            std::vector<BitPattern> mStream;
 
         private:
             //void ModifyBit(byte* val, byte offset, bool set);
             //void ModifyBit(byte* val, byte offset);
-            void ModifyBit(char* buf, int offset, bool set);
 
             int mBitCursor;
     };
