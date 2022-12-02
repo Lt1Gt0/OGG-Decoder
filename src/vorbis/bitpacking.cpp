@@ -1,4 +1,5 @@
 #include "vorbis/bitpacking.h"
+#include <bit>
 #include <stdio.h>
 #include <vector>
 #include <math.h>
@@ -67,17 +68,31 @@ namespace Vorbis
         BitPattern streamVal = mStream.back();
         mStream.pop_back();
 
-        for (char c : DumpBits(_val)) {
+        std::string dumpped;
+
+        // Test case (Move to a method in the future)
+        // DISCLAIMER: I know that this is not the best way to check for endianess
+        if (DumpBits(13) == "1101") {
+            std::string tmp = DumpBits(_val);
+            for (int i = tmp.size() - 1; i >= 0; i--) {
+                dumpped += tmp[i];
+            }
+        } else {
+            dumpped = DumpBits(_val);
+        }
+
+        for (char c : dumpped) {
+            std::cout << c << " ";
             if (mBitCursor == 7) {
                 mStream.push_back(streamVal);
                 mBitCursor = 0;
                 streamVal = EmptBitPattern();
             }    
 
-            streamVal.mBuf[mBitCursor] = c;
-            mBitCursor++;
+            streamVal.mBuf[7 - ++mBitCursor] = c;
         }
 
+        std::cout << "\n";
         mStream.push_back(streamVal);
     }
 

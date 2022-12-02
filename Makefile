@@ -6,7 +6,7 @@ LOG_DIR = logs
 
 #Compiler and linker things
 CC = g++
-CCFLAGS = -g -Wall -Wextra -std=c++17
+CCFLAGS = -g -Wall -Wextra -std=c++20
 #CCFLAGS += -Wno-write-strings # figure out how to make a make recipe for suppressed warnings rather than forcing it
 LD = ld
 LDFLAGS = 
@@ -36,3 +36,4 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 clean:
 	rm -rf $(OBJ_DIR)/
 	rm -rf $(LOG_DIR)/
+	rm $(OBJ)
