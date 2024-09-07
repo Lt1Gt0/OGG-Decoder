@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _ENDIAN_H
-#define _ENDIAN_H
+#ifndef _ENDIAN_HPP_
+#define _ENDIAN_HPP_
 
 #include <stdint.h>
 
@@ -93,4 +93,4 @@ namespace Endian
     }
 }
 
-#endif // _ENDIAN_H
+#endif // _ENDIAN_HPP_

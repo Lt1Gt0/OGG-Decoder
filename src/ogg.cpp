@@ -1,11 +1,11 @@
-#include "ogg.h"
-#include "endian.h"
-#include "logger.h"
-#include "common.h"
+#include "ogg.hpp"
+#include "endian.hpp"
+#include "logger.hpp"
+#include "common.hpp"
 
 // Codec Includes
-//#include "oggmeta.h"
-//#include "vorbis/vorbis.h"
+//#include "oggmeta.hpp"
+//#include "vorbis/vorbis.hpp"
 
 #include <stdlib.h>
 

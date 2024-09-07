@@ -1,4 +1,4 @@
-#include "vorbis/bitpacking.h"
+#include "vorbis/bitpacking.hpp"
 #include <bit>
 #include <stdio.h>
 #include <vector>
@@ -43,7 +43,7 @@ namespace Vorbis
 {
     Bitstream::Bitstream()
     {
-        mStream = std::vector<BitPattern>(); 
+        mStream = std::vector<Vorbis::BitPattern>(); 
         mBitCursor = 0;
     }
 

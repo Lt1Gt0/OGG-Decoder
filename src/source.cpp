@@ -1,10 +1,10 @@
 #include <iostream>
 #include <bits/stdc++.h>
-#include "ogg.h"
-#include "oggmeta.h"
-#include "common.h"
-#include "logger.h"
-#include "vorbis/bitpacking.h"
+// #include "ogg.hpp"
+// #include "oggmeta.hpp"
+#include "common.hpp"
+#include "logger.hpp"
+#include "vorbis/bitpacking.hpp"
 
 /*
     The current file (test.ogg) does contain a vorbis mapping, currently this program does

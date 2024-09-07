@@ -1,6 +1,6 @@
 #pragma once
-#ifndef VORBIS_CODEBOOK_H
-#define VORBIS_CODEBOOK_H
+#ifndef VORBIS_CODEBOOK_HPP_
+#define VORBIS_CODEBOOK_HPP_
 
 namespace Vorbis
 {
@@ -12,4 +12,4 @@ namespace Vorbis
     };
 }
 
-#endif // VORBIS_CODEBOOK_H
+#endif // VORBIS_CODEBOOK_HPP_

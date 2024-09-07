@@ -1,4 +1,4 @@
-#include "vorbis/codebook.h"
+#include "vorbis/codebook.hpp"
 
 namespace Vorbis
 {

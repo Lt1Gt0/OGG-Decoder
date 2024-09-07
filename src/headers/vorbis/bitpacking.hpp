@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _VORBIS_BITPACKING_H
-#define _VORBIS_BITPACKING_H
+#ifndef _VORBIS_BITPACKING_HPP_
+#define _VORBIS_BITPACKING_HPP_
 
 #include <iostream>
 #include <stdint.h>
@@ -18,7 +18,6 @@ typedef char byteString[8];
 
 namespace Vorbis
 {
-
     struct BitPattern {
         char* mBuf;
     };
@@ -50,4 +49,4 @@ namespace Vorbis
     }
 }
 
-#endif // _VORBIS_BITPACKING_H
+#endif // _VORBIS_BITPACKING_HPP_

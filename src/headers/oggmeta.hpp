@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _OGG_META_H
-#define _OGG_META_H
+#ifndef _OGG_META_HPP_
+#define _OGG_META_HPP_
 
 //#include "common.h"
 //#include "vorbis/vorbis.h"
@@ -74,4 +74,5 @@ namespace OggMeta
     //};
 //}
 
-#endif // _OGG_META_H
+
+#endif // _OGG_META_HPP_

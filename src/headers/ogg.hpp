@@ -1,11 +1,11 @@
 #pragma once
-#ifndef _OGG_H
-#define _OGG_H
+#ifndef _OGG_HPP_
+#define _OGG_HPP_
 
 #include <vector>
 #include <string>
 #include <stdio.h>
-#include "oggmeta.h"
+#include "oggmeta.hpp"
 
 enum OggStatus : int {
     PAGE_HEADER_SUCCESS     = 0,
@@ -45,4 +45,4 @@ class OGG
         
 };
 
-#endif // _OGG_H
+#endif // _OGG_HPP_

@@ -1,10 +1,10 @@
 #pragma once
-#ifndef _COMMON_H
-#define _COMMON_H
+#ifndef _COMMON_HPP_
+#define _COMMON_HPP_
 
 #include <stdint.h>
 #include <iostream>
-#include "logger.h"
+#include "logger.hpp"
 
 /**
  * Different Ogg Codec types that I know exist
@@ -51,5 +51,4 @@ inline constexpr void error(Severity severity, T head, Ts... tail)
     std::cerr << head << " ";
     error(severity, tail...);
 }
-
-#endif // _COMMON_H
+#endif // _COMMON_HPP_

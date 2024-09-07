@@ -1,4 +1,4 @@
-#include "vorbis/vorbis.h"
+#include "vorbis/vorbis.hpp"
 
 namespace Vorbis
 {

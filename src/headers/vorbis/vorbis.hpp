@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _OGG_VORBIS_APPLICATION_H
-#define _OGG_VORBIS_APPLICATION_H
+#ifndef _OGG_VORBIS_APPLICATION_HPP_
+#define _OGG_VORBIS_APPLICATION_HPP_
 
 /*
 Steps to decode (according to Vorbis I Spec)
@@ -23,4 +23,4 @@ namespace Vorbis
 
 }
 
-#endif // _OGG_VORBIS_APPLICATION_H
+#endif // _OGG_VORBIS_APPLICATION_HPP_

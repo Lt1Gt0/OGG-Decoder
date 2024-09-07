@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _VORBIS_HELPERS_H
-#define _VORBIS_HELPERS_H
+#ifndef _VORBIS_HELPERS_HPP_
+#define _VORBIS_HELPERS_HPP_
 
 // All of these are given in part 9 and 10 of 
 // the vorbis 1 specification
@@ -87,4 +87,4 @@ namespace Vorbis
 
 }
 
-#endif // _VORBIS_HELPERS_H 
+#endif // _VORBIS_HELPERS_HPP_
