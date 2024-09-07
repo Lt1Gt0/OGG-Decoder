@@ -9,3 +9,6 @@ obj/
 redirects/
 
 .ccls-cache/
+
+logs/
+ogg-decode

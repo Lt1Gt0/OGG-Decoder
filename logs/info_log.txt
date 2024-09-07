@@ -1,2 +1,0 @@
-﻿2024-09-07 11:57:36    SUCCESS Initalized Logger
-2024-09-07 11:57:36    INFO    Finished Reading after page header(s)
