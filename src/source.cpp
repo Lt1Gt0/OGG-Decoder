@@ -22,9 +22,9 @@ int main(int argc, char** argv)
     
     Vorbis::Bitstream bitstream;
     bitstream.Insert(12);
-    bitstream.Insert(-1);
+    // bitstream.Insert(-1);
 
-    for (Vorbis::BitPattern pattern : bitstream.mStream) {
+    for (auto pattern : bitstream.mStream) {
         //for (int i = 7; i >= 0; i--) {
         for (int i = 0; i < 7; i++) {
             std::cout << pattern.mBuf[i];

@@ -54,7 +54,7 @@ namespace Vorbis
 
     void Bitstream::Insert(uint32_t _val) 
     {
-        auto EmptBitPattern = []() -> BitPattern 
+        auto EmptyBitPattern = []() -> BitPattern 
         {
             BitPattern pattern; 
             pattern.mBuf = new char[8];
@@ -63,7 +63,7 @@ namespace Vorbis
         };
 
         if (mStream.size() == 0)
-            mStream.push_back(EmptBitPattern());
+            mStream.push_back(EmptyBitPattern());
 
         BitPattern streamVal = mStream.back();
         mStream.pop_back();
@@ -82,17 +82,17 @@ namespace Vorbis
         }
 
         for (char c : dumpped) {
-            std::cout << c << " ";
+            // std::cout << c << " ";
             if (mBitCursor == 7) {
                 mStream.push_back(streamVal);
                 mBitCursor = 0;
-                streamVal = EmptBitPattern();
+                streamVal = EmptyBitPattern();
             }    
 
             streamVal.mBuf[7 - ++mBitCursor] = c;
         }
 
-        std::cout << "\n";
+        // std::cout << "\n";
         mStream.push_back(streamVal);
     }
 
